@@ -1,6 +1,0 @@
-SQLALCHEMY_BINDS = {
-        "db_localhost":"postgresql://postgres:admin123@127.0.0.1:5432/local_db"
-}
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_ECHO = False
-API_BASE_URL = 'https://stagingapi.momspresso.com'
