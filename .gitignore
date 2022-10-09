@@ -24,3 +24,4 @@ config/staging.cfg
 .venv/
 env/
 selenium_session
+*.xlsx

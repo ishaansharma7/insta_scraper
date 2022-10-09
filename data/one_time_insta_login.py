@@ -6,15 +6,11 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from dotenv import load_dotenv
 import shutil
+from flask import current_app
 
 
-load_dotenv()
-CHROMEDRIVER = os.getenv('CHROMEDRIVER')
-HEADLESS = True if os.getenv('HEADLESS') == '1' else False
-USER_NAME = os.getenv('USER_NAME')
-PASSWORD = os.getenv('PASSWORD')
+
 
 
 def check_exists_by_xpath(driver, xpath):
@@ -61,8 +57,11 @@ def automated_login(driver, username, password):
     print('login done')
 
 
-def do_insta_login():
+def do_insta_login(USER_NAME, PASSWORD):
     try:
+        CHROMEDRIVER = current_app.config['CHROMEDRIVER']
+        HEADLESS = True if current_app.config['HEADLESS'] == '1' else False
+
         session_path = os.path.join(os.getcwd(), 'selenium_session')
         if os.path.exists(session_path):
             print('Previous session found------')
@@ -74,7 +73,6 @@ def do_insta_login():
         driver.get(url)
         automated_login(driver, USER_NAME, PASSWORD)
         sleep(2)
-        # driver.quit()
         return True, driver
     except Exception:
         traceback.print_exc()
