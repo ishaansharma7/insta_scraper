@@ -26,8 +26,9 @@ def insta_login():
 def process_reels_func():
    batch = {
       "ee8a3f35ad4645e2b7892178a7f7d2cc" : "gudsaloni",
+      "ee8c5ed8e82545698403a55c7678eff3" : "ishaansharma711",
       "ee8c5ed8e82545698403a55c7678eff2" : "ripans_world",
-      "eea64b19faab40cfbb2361ee76b74fe0" : "malhotrashyna40",
+      # "eea64b19faab40cfbb2361ee76b74fe0" : "malhotrashyna40",
    }
    process_reels.process_reels(batch)
    return

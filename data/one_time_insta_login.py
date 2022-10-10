@@ -8,6 +8,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 import shutil
 from flask import current_app
+from constants import CHROMEDRIVER, HEADLESS
 
 
 
@@ -59,9 +60,6 @@ def automated_login(driver, username, password):
 
 def do_insta_login(USER_NAME, PASSWORD):
     try:
-        CHROMEDRIVER = current_app.config['CHROMEDRIVER']
-        HEADLESS = True if current_app.config['HEADLESS'] == '1' else False
-
         session_path = os.path.join(os.getcwd(), 'selenium_session')
         if os.path.exists(session_path):
             print('Previous session found------')
