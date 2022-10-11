@@ -3,7 +3,7 @@ from data.one_time_insta_login import do_insta_login
 from flask import current_app
 import pandas as pd
 import random
-from utils.exist_check import check_handle_valid
+from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
 
@@ -14,10 +14,13 @@ def request_scrapping_creds():
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
     if consecutive_fail_ct >= CONSECUTIVE_FAIL_LIMIT:
+        print('scrapping id banned-------')
         return 'scrapping id banned'
     if selenium_fail_ct >= SELENIUM_FAIL_LIMIT:
+        print('selenium code break-------')
         return 'selenium code break'
     return None
+
 
 
 def process_reels(batch: dict):
@@ -36,9 +39,27 @@ def process_reels(batch: dict):
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
     selenium_fail_ct = 0        # help to identify selenium code break
+    scraping_id_status = {'scraping_id': scraping_id, 'status': 'in_use'}
+    response = {'batch_status': user_name_status, 'scraping_id_status': scraping_id_status, }
+
 
     for user_id, user_name,  in batch.items():
 
+        curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
+        if curr_health:
+            if curr_health == 'scrapping id banned':
+                driver.quit()
+                consecutive_fail_ct = 0
+                failed_scrape_list.clear()
+                login_success, driver = do_insta_login(scraping_id, password)
+                if not login_success:
+                    print('login failed exiting------')
+                    return response
+                scraping_id_status['scraping_id'] = scraping_id
+                scraping_id_status['status'] = 'in_use'
+            elif curr_health == 'selenium code break':
+                print('selenium code break-------')
+                return response
 
         media_df = pd.DataFrame(columns=["user_name", "media_url", "shortcode", "comments_count", "like_count", "view_count", "user_id"])
         print(user_name, user_id)
@@ -61,6 +82,10 @@ def process_reels(batch: dict):
             consecutive_fail_ct = 0
             user_name_status.update(**{k: 2 for k in failed_scrape_list})
             failed_scrape_list.clear()
+
+        if user_handle_pvt(driver):
+            print('skipping further process------')
+            continue
 
 
         user_df = get_user_details(driver.page_source, user_name, user_id)
@@ -93,10 +118,9 @@ def process_reels(batch: dict):
             print(f'{user_name} scrapped------')
 
         # here add the db code
-        # media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
-        # if user_df:
-        #     user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
+
+        user_name_status.update({user_name: 1})
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
-    
-    return {'scrape_status': user_name_status, 'scraping_id': scraping_id}
+    scraping_id_status['status'] = 'free'
+    return response

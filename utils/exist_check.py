@@ -43,3 +43,12 @@ def check_handle_valid2(driver):
         traceback.print_exc()
         print('valid user handle--------')
     return valid_handle
+
+
+def user_handle_pvt(driver):
+    try:
+        private_ele =  WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_u')))
+        print('private user handle--------')
+        return True
+    except Exception:
+        return False

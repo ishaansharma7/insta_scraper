@@ -39,7 +39,7 @@ def automated_login(driver, username, password):
     ActionChains(driver).move_to_element(log_in_page).pause(1).click(log_in_page).perform()
 
     body = driver.find_element_by_tag_name("body")
-    wait = WebDriverWait(driver, 7, poll_frequency=0.5)
+    wait = WebDriverWait(driver, 10, poll_frequency=0.5)
     wait.until(EC.staleness_of(body))
     print(driver.current_url)
 
