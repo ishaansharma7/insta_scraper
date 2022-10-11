@@ -35,7 +35,7 @@ def process_reels(batch: dict):
     # 0 means data not processed
     # 1 means data processed
     # 2 means user_name changed
-    user_name_status = {v: 0 for k, v in batch.items()}
+    user_name_status = {v: {'status': 'not_scrapped', 'reason': 'scrapping not started'} for k, v in batch.items()}
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
     selenium_fail_ct = 0        # help to identify selenium code break
@@ -44,7 +44,7 @@ def process_reels(batch: dict):
 
 
     for user_id, user_name,  in batch.items():
-
+        print('**********************************************')
         curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
         if curr_health:
             if curr_health == 'scrapping id banned':
@@ -80,20 +80,22 @@ def process_reels(batch: dict):
             continue
         else:
             consecutive_fail_ct = 0
-            user_name_status.update(**{k: 2 for k in failed_scrape_list})
+            user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
             failed_scrape_list.clear()
 
         if user_handle_pvt(driver):
+            user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
             print('skipping further process------')
             continue
 
 
-        user_df = get_user_details(driver.page_source, user_name, user_id)
+        # user_df = get_user_details(driver.page_source, user_name, user_id)
 
 
         wait_time = random.randrange(2, 6)
         SCROLL_PAUSE_TIME = wait_time
         while True:
+            media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
             last_height = driver.execute_script("return document.body.scrollHeight")
 
             # Scroll down to bottom
@@ -107,19 +109,19 @@ def process_reels(batch: dict):
             if new_height == last_height:
                 break
             last_height = new_height
-            media_df = get_reel_details(driver.page_source, user_name, user_id, media_df)
+            print('reached---')
         
-        if not len(media_df):
+        if len(media_df) == 0 and not sele_worked:
             selenium_fail_ct += 1
             print('no details scrapped------')
-            continue
+            # continue
         else:
             selenium_fail_ct = 0
             print(f'{user_name} scrapped------')
+            user_name_status.update({user_name: {'status': 'scrapped', 'reason': 'successful'}})
 
         # here add the db code
-
-        user_name_status.update({user_name: 1})
+        media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
     scraping_id_status['status'] = 'free'

@@ -37,7 +37,8 @@ def get_reel_details(contents, user_name, user_id, media_df):
                                 }, ignore_index=True)
     except Exception as e:
         traceback.print_exc()
-    return media_df
+        return media_df, False
+    return media_df, True
 
 
 def get_user_details(contents, user_name, user_id):
