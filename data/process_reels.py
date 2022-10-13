@@ -26,7 +26,6 @@ def update_scrape_id_status(scraping_id='', status=''):
         traceback.print_exc()
 
 def request_scraping_creds(first_time=True, scraping_id='', status=''):
-
     if not first_time:
         update_scrape_id_status(scraping_id, status)
     try:
@@ -147,12 +146,11 @@ def process_reels(batch: dict):
             if new_height == last_height:
                 break
             last_height = new_height
-            print('reached---')
         
         if len(media_df) == 0 and not sele_worked:
             selenium_fail_ct += 1
             print('no details scraped------')
-            # continue
+            continue
         else:
             selenium_fail_ct = 0
             print(f'{user_name} scraped------')
