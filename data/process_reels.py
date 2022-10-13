@@ -6,16 +6,37 @@ import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
+import requests
+import json
 
-def request_scrapping_creds():
-    USER_NAME = current_app.config['USER_NAME']
-    PASSWORD = current_app.config['PASSWORD']
-    return USER_NAME, PASSWORD
+
+def update_scrape_id_status(scraping_id='', status=''):
+    url = "http://127.0.0.1:5000/manager/update/status/scrape-id/"
+    payload = json.dumps({
+    "scraping_id": scraping_id,
+    "status": status
+    })
+    headers = {
+    'Content-Type': 'application/json',
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+def request_scraping_creds(first_time=True, scraping_id='', status=''):
+
+    if not first_time:
+        update_scrape_id_status(scraping_id, status)
+
+    url = "http://127.0.0.1:5000/manager/send/scrape-id/"
+    payload={}
+    response = requests.request("GET", url, data=payload).json()
+    scraping_id = response['data']['result']['scrape_id']
+    password = response['data']['result']['password']
+    return scraping_id, password
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
     if consecutive_fail_ct >= CONSECUTIVE_FAIL_LIMIT:
-        print('scrapping id banned-------')
-        return 'scrapping id banned'
+        print('scraping id banned-------')
+        return 'scraping id banned'
     if selenium_fail_ct >= SELENIUM_FAIL_LIMIT:
         print('selenium code break-------')
         return 'selenium code break'
@@ -25,17 +46,14 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
 
 def process_reels(batch: dict):
 
-    scraping_id, password = request_scrapping_creds()
+    scraping_id, password = request_scraping_creds()
     login_success, driver = do_insta_login(scraping_id, password)
     if not login_success:
         print('login failed exiting------')
         return
         # handle this case
 
-    # 0 means data not processed
-    # 1 means data processed
-    # 2 means user_name changed
-    user_name_status = {v: {'status': 'not_scrapped', 'reason': 'scrapping not started'} for k, v in batch.items()}
+    user_name_status = {v: {'status': 'not_scraped', 'reason': 'scraping not started'} for k, v in batch.items()}
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
     selenium_fail_ct = 0        # help to identify selenium code break
@@ -47,10 +65,11 @@ def process_reels(batch: dict):
         print('**********************************************')
         curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
         if curr_health:
-            if curr_health == 'scrapping id banned':
+            if curr_health == 'scraping id banned':
                 driver.quit()
                 consecutive_fail_ct = 0
                 failed_scrape_list.clear()
+                scraping_id, password = request_scraping_creds(False, scraping_id, 'banned')
                 login_success, driver = do_insta_login(scraping_id, password)
                 if not login_success:
                     print('login failed exiting------')
@@ -113,12 +132,12 @@ def process_reels(batch: dict):
         
         if len(media_df) == 0 and not sele_worked:
             selenium_fail_ct += 1
-            print('no details scrapped------')
+            print('no details scraped------')
             # continue
         else:
             selenium_fail_ct = 0
-            print(f'{user_name} scrapped------')
-            user_name_status.update({user_name: {'status': 'scrapped', 'reason': 'successful'}})
+            print(f'{user_name} scraped------')
+            user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
