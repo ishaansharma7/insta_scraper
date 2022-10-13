@@ -1,4 +1,5 @@
 from time import sleep
+import traceback
 from data.one_time_insta_login import do_insta_login
 from flask import current_app
 import pandas as pd
@@ -11,27 +12,33 @@ import json
 
 
 def update_scrape_id_status(scraping_id='', status=''):
-    url = "http://127.0.0.1:5000/manager/update/status/scrape-id/"
-    payload = json.dumps({
-    "scraping_id": scraping_id,
-    "status": status
-    })
-    headers = {
-    'Content-Type': 'application/json',
-    }
-    response = requests.request("POST", url, headers=headers, data=payload)
+    try:
+        url = "http://127.0.0.1:5000/manager/update/status/scrape-id/"
+        payload = json.dumps({
+        "scraping_id": scraping_id,
+        "status": status
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
 
 def request_scraping_creds(first_time=True, scraping_id='', status=''):
 
     if not first_time:
         update_scrape_id_status(scraping_id, status)
-
-    url = "http://127.0.0.1:5000/manager/send/scrape-id/"
-    payload={}
-    response = requests.request("GET", url, data=payload).json()
-    scraping_id = response['data']['result']['scrape_id']
-    password = response['data']['result']['password']
-    return scraping_id, password
+    try:
+        url = "http://127.0.0.1:5000/manager/send/scrape-id/"
+        payload={}
+        response = requests.request("GET", url, data=payload).json()
+        scraping_id = response['data']['result']['scrape_id']
+        password = response['data']['result']['password']
+        return scraping_id, password
+    except Exception:
+        traceback.print_exc()
+        return None, None
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
     if consecutive_fail_ct >= CONSECUTIVE_FAIL_LIMIT:
@@ -47,6 +54,9 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
 def process_reels(batch: dict):
 
     scraping_id, password = request_scraping_creds()
+    if not scraping_id or not password:
+        print('problem in fetching scrape id creds, exiting-----')
+        return
     login_success, driver = do_insta_login(scraping_id, password)
     if not login_success:
         print('login failed exiting------')
@@ -63,6 +73,8 @@ def process_reels(batch: dict):
 
     for user_id, user_name,  in batch.items():
         print('**********************************************')
+
+        ###################### health check process ######################
         curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
         if curr_health:
             if curr_health == 'scraping id banned':
@@ -70,6 +82,9 @@ def process_reels(batch: dict):
                 consecutive_fail_ct = 0
                 failed_scrape_list.clear()
                 scraping_id, password = request_scraping_creds(False, scraping_id, 'banned')
+                if not scraping_id or not password:
+                    print('problem in fetching scrape id creds, exiting-----')
+                    return
                 login_success, driver = do_insta_login(scraping_id, password)
                 if not login_success:
                     print('login failed exiting------')
@@ -80,6 +95,7 @@ def process_reels(batch: dict):
                 print('selenium code break-------')
                 return response
 
+        ###################### pd dataframe ######################
         media_df = pd.DataFrame(columns=["user_name", "media_url", "shortcode", "comments_count", "like_count", "view_count", "user_id"])
         print(user_name, user_id)
 
@@ -88,10 +104,10 @@ def process_reels(batch: dict):
 
         driver.get("https://www.instagram.com/{user_name}/reels/".format(user_name=user_name))
 
-        
         wait_time = random.randrange(3, 5)
         sleep(wait_time)
         
+        ###################### checking account ######################
         if not check_handle_valid(driver):
             failed_scrape_list.append(user_name)
             consecutive_fail_ct += 1
@@ -113,6 +129,9 @@ def process_reels(batch: dict):
 
         wait_time = random.randrange(2, 6)
         SCROLL_PAUSE_TIME = wait_time
+
+
+        ###################### scraping reels data ######################
         while True:
             media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
             last_height = driver.execute_script("return document.body.scrollHeight")
