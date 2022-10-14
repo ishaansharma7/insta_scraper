@@ -132,7 +132,8 @@ def process_reels(batch: dict):
 
 
         ###################### scraping reels data ######################
-        while True:
+        count = 0
+        while count <= 5:
             media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
             last_height = driver.execute_script("return document.body.scrollHeight")
 
@@ -147,6 +148,7 @@ def process_reels(batch: dict):
             if new_height == last_height:
                 break
             last_height = new_height
+            count += 1
         
         if len(media_df) == 0 and not sele_worked:
             selenium_fail_ct += 1

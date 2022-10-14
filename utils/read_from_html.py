@@ -42,13 +42,15 @@ def get_reel_details(contents, user_name, user_id, media_df):
 
 
 def get_user_details(contents, user_name, user_id):
+    user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type"])
+    user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
     try:
         beautifulSoupText = BeautifulSoup(contents, 'html.parser')
         reel_div = beautifulSoupText.find('main')
         if reel_div:
-            profile_header = reel_div.find("header", attrs={"class": "_aa_h"})
+            # profile_header = reel_div.find("header", attrs={"class": "_aa_h"})
+            profile_header = reel_div.find("header", attrs={"class": "x1gv9v1y x1dgd101 x186nx3s x1n2onr6 x2lah0s x1q0g3np x78zum5 x1qjc9v5 xlue5dm x1tb5o9v"})
             if profile_header:
-                user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type"])
                 insta_user_name = profile_header.find("h2").text
                 profile_url = profile_header.find("img")["src"]
 
@@ -63,23 +65,31 @@ def get_user_details(contents, user_name, user_id):
                 private_account_status = True if private_account else False
 
                 # print(insta_user_name, profile_url, post_count, followers_count, following_count, bio, private_account_status)
-
-                user_df = user_df.append({
-                                    "user_id" : user_id,
-                                    "user_name" : user_name,
-                                    "insta_user_name" : insta_user_name, 
-                                    "profile_url" : profile_url, 
-                                    "post_count": post_count, 
-                                    "followers_count" : followers_count, 
-                                    "following_count" : following_count, 
-                                    "bio" : bio, 
-                                    "account_type" : private_account_status
-                                }, ignore_index=True)
-                return user_df
-        else:
-            with open(user_name + '.html', 'w') as f:
-                f.write(beautifulSoupText.prettify())
+                
+            else:
+                page_exist_status = beautifulSoupText.find_all("h2")
+                if len(page_exist_status) > 1:
+                    if page_exist_status[0].text == '''"Sorry, this page isn't available."''':
+                        account_exists_status = False
+            
+        user_df = user_df.append({
+                                "user_id" : user_id,
+                                "user_name" : user_name,
+                                "insta_user_name" : insta_user_name, 
+                                "profile_url" : profile_url, 
+                                "post_count": post_count, 
+                                "followers_count" : followers_count, 
+                                "following_count" : following_count, 
+                                "bio" : bio, 
+                                "account_type" : private_account_status,
+                                "account_exists_status" : account_exists_status
+                            }, ignore_index=True)
+        return user_df
+        # else:
+        #     with open(user_name + '.html', 'w') as f:
+        #         f.write(beautifulSoupText.prettify())
     except Exception as e:
         traceback.print_exc()
         pass
-    
+    finally:
+        return user_df
