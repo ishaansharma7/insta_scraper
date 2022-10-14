@@ -13,6 +13,7 @@ import json
 import traceback
 from scripts.kafka_producer import send_to_insta_kafka
 import requests
+from constants import SEND_USERNAME_URL
 
 
 @application.cli.command('test_cmd')
@@ -30,7 +31,7 @@ def insta_login():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   batch = requests.get('http://127.0.0.1:5000/manager/send/user-names/').json()
+   batch = requests.get(SEND_USERNAME_URL).json()
    pprint(process_reels.process_reels(batch['data']['result']))
    return
 

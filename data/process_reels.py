@@ -9,11 +9,12 @@ from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
 import requests
 import json
+from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL
 
 
 def update_scrape_id_status(scraping_id='', status=''):
     try:
-        url = "http://127.0.0.1:5000/manager/update/status/scrape-id/"
+        url = UPDATE_SCRAPEID_STATUS_URL
         payload = json.dumps({
         "scraping_id": scraping_id,
         "status": status
@@ -29,7 +30,7 @@ def request_scraping_creds(first_time=True, scraping_id='', status=''):
     if not first_time:
         update_scrape_id_status(scraping_id, status)
     try:
-        url = "http://127.0.0.1:5000/manager/send/scrape-id/"
+        url = SEND_SCRAPEID_URL
         payload={}
         response = requests.request("GET", url, data=payload).json()
         scraping_id = response['data']['result']['scrape_id']
