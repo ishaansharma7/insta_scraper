@@ -9,36 +9,9 @@ from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
 import requests
 import json
+from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api
 
 
-def update_scrape_id_status(scraping_id='', status=''):
-    try:
-        url = "http://127.0.0.1:5000/manager/update/status/scrape-id/"
-        payload = json.dumps({
-        "scraping_id": scraping_id,
-        "status": status
-        })
-        headers = {
-        'Content-Type': 'application/json',
-        }
-        response = requests.request("POST", url, headers=headers, data=payload)
-    except Exception:
-        traceback.print_exc()
-
-def request_scraping_creds(first_time=True, scraping_id='', status=''):
-
-    if not first_time:
-        update_scrape_id_status(scraping_id, status)
-    try:
-        url = "http://127.0.0.1:5000/manager/send/scrape-id/"
-        payload={}
-        response = requests.request("GET", url, data=payload).json()
-        scraping_id = response['data']['result']['scrape_id']
-        password = response['data']['result']['password']
-        return scraping_id, password
-    except Exception:
-        traceback.print_exc()
-        return None, None
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
     if consecutive_fail_ct >= CONSECUTIVE_FAIL_LIMIT:
@@ -63,15 +36,15 @@ def process_reels(batch: dict):
         return
         # handle this case
 
-    user_name_status = {v: {'status': 'not_scraped', 'reason': 'scraping not started'} for k, v in batch.items()}
+    user_name_status = {k: {'status': 'not_scraped', 'reason': 'scraping not started'} for k, v in batch.items()}
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
     selenium_fail_ct = 0        # help to identify selenium code break
-    scraping_id_status = {'scraping_id': scraping_id, 'status': 'in_use'}
+    scraping_id_status = {'scrape_id': scraping_id, 'status': 'in_use'}
     response = {'batch_status': user_name_status, 'scraping_id_status': scraping_id_status, }
 
 
-    for user_id, user_name,  in batch.items():
+    for user_name, user_id in batch.items():
         print('**********************************************')
 
         ###################### health check process ######################
@@ -89,7 +62,7 @@ def process_reels(batch: dict):
                 if not login_success:
                     print('login failed exiting------')
                     return response
-                scraping_id_status['scraping_id'] = scraping_id
+                scraping_id_status['scrape_id'] = scraping_id
                 scraping_id_status['status'] = 'in_use'
             elif curr_health == 'selenium code break':
                 print('selenium code break-------')
@@ -124,7 +97,13 @@ def process_reels(batch: dict):
             continue
 
 
-        # user_df = get_user_details(driver.page_source, user_name, user_id)
+        try:
+            user_df = get_user_details(driver.page_source, user_name, user_id)
+            user_data_to_api(user_df)
+            user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
+        except Exception as e:
+            print(e)
+            pass
 
 
         wait_time = random.randrange(2, 6)
@@ -132,7 +111,8 @@ def process_reels(batch: dict):
 
 
         ###################### scraping reels data ######################
-        while True:
+        count = 0
+        while count <= 5:
             media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
             last_height = driver.execute_script("return document.body.scrollHeight")
 
@@ -147,20 +127,22 @@ def process_reels(batch: dict):
             if new_height == last_height:
                 break
             last_height = new_height
-            print('reached---')
+            count += 1
         
         if len(media_df) == 0 and not sele_worked:
             selenium_fail_ct += 1
             print('no details scraped------')
-            # continue
+            continue
         else:
             selenium_fail_ct = 0
             print(f'{user_name} scraped------')
             user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
+        reels_data_to_api(media_df)
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
     scraping_id_status['status'] = 'free'
-    return response
+    return_status_resp(user_name_status, scraping_id_status)
+    return 'completed----'
