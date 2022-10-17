@@ -1,7 +1,7 @@
 import requests
 import json
 import traceback
-from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL
+from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL
 from datetime import datetime
 
 
@@ -108,3 +108,10 @@ def return_status_resp(user_name_status: dict, scraping_id_status: dict):
         traceback.print_exc()
     return
     
+def get_user_name_batch(limit=5):
+    try:
+        batch = requests.get(SEND_USERNAME_URL, params={'limit':limit}).json()['data']['result']
+        return batch
+    except Exception:
+        traceback.print_exc()
+    return None
