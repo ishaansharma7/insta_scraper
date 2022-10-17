@@ -9,7 +9,7 @@ from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
 import requests
 import json
-from data.send_data_to_apis import request_scraping_creds, return_resp
+from data.send_data_to_apis import request_scraping_creds, return_resp, reels_data_to_api
 
 
 
@@ -138,6 +138,7 @@ def process_reels(batch: dict):
             user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
+        reels_data_to_api(media_df)
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
