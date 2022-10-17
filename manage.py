@@ -8,6 +8,7 @@ import time
 from scripts.test_script import hello_world
 from data import one_time_insta_login
 from data import process_reels
+from data.send_data_to_apis import get_user_name_batch
 from kafka import KafkaConsumer
 import json
 import traceback
@@ -31,8 +32,9 @@ def insta_login():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   batch = requests.get(SEND_USERNAME_URL, params={'limit':3}).json()['data']['result']
-   pprint(process_reels.process_reels(batch))
+   batch = get_user_name_batch(5)
+   if batch:
+      print(process_reels.process_reels(batch))
    return
 
 
