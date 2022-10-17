@@ -96,7 +96,7 @@ def number_clean_up(clean_value):
 		pass
 	return clean_value
 
-def return_resp(user_name_status: dict, scraping_id_status: dict):
+def return_status_resp(user_name_status: dict, scraping_id_status: dict):
     try:
         f_resp = {'user_name_status': [],}
         for k, v in user_name_status.items():

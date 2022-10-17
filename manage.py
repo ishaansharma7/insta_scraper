@@ -31,7 +31,7 @@ def insta_login():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   batch = requests.get(SEND_USERNAME_URL).json()['data']['result']
+   batch = requests.get(SEND_USERNAME_URL, params={'limit':3}).json()['data']['result']
    pprint(process_reels.process_reels(batch))
    return
 

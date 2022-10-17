@@ -9,7 +9,7 @@ from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
 import requests
 import json
-from data.send_data_to_apis import request_scraping_creds, return_resp, reels_data_to_api
+from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api
 
 
 
@@ -99,6 +99,7 @@ def process_reels(batch: dict):
 
         try:
             user_df = get_user_details(driver.page_source, user_name, user_id)
+            user_data_to_api(user_df)
             user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
             print(e)
@@ -143,5 +144,5 @@ def process_reels(batch: dict):
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
     scraping_id_status['status'] = 'free'
-    return_resp(user_name_status, scraping_id_status)
+    return_status_resp(user_name_status, scraping_id_status)
     return 'completed----'
