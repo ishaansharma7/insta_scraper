@@ -14,7 +14,9 @@ import json
 import traceback
 from scripts.kafka_producer import send_to_insta_kafka
 import requests
-from constants import BATCH_SIZE
+from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS
+from utils.selenium_driver import get_web_driver
+from utils.exist_check import check_if_logged_in
 
 
 @application.cli.command('test_cmd')
@@ -22,20 +24,17 @@ def func_test_cmd():
    hello_world()
 
 
-@application.cli.command('insta_login')
+@application.cli.command('login_check')
 def insta_login():
-   USER_NAME = current_app.config['USER_NAME']
-   PASSWORD = current_app.config['PASSWORD']
-   one_time_insta_login.do_insta_login(USER_NAME, PASSWORD)
+   driver = get_web_driver(CHROMEDRIVER, HEADLESS)
+   print(check_if_logged_in(driver))
    return
 
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   batch = get_user_name_batch(BATCH_SIZE)
    # batch = {'i.kishanrajput': '', }
-   if batch:
-      print(process_reels.process_reels(batch))
+   print(process_reels.process_reels())
    return
 
 

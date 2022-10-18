@@ -6,11 +6,12 @@ import pandas as pd
 import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_reel_details, get_user_details
-from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION
+from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
 import requests
 import json
-from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api
+from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api, get_user_name_batch
 from utils.selenium_driver import get_web_driver
+from utils.exist_check import check_if_logged_in
 
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
@@ -24,8 +25,9 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
 
 
 
-def process_reels(batch: dict):
+def process_reels(batch=None):
 
+    ###################### login id and password ######################
     if CRED_AVAILABLE:
         scraping_id, password = USER_NAME, PASSWORD
     else:
@@ -33,16 +35,26 @@ def process_reels(batch: dict):
     if not scraping_id or not password:
         print('problem in fetching scrape id creds, exiting-----')
         return
-        
+    
+    ###################### session usage ######################
     if REUSE_SESSION:
-        login_success, driver = True, get_web_driver(CHROMEDRIVER, HEADLESS)
+        driver = get_web_driver(CHROMEDRIVER, HEADLESS)
+        login_success = check_if_logged_in(driver)
     else:
         login_success, driver = do_insta_login(scraping_id, password)
     if not login_success:
         print('login failed exiting------')
         return
         # handle this case
-
+    
+    ###################### get batch ######################
+    if not batch:
+        batch = get_user_name_batch(BATCH_SIZE)
+        if not batch:
+            print('problem in getting batch-----')
+            return
+    
+    ###################### variables ######################
     user_name_status = {k: {'status': 'not_scraped', 'reason': 'scraping not started'} for k, v in batch.items()}
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
