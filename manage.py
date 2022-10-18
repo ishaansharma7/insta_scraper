@@ -14,7 +14,7 @@ import json
 import traceback
 from scripts.kafka_producer import send_to_insta_kafka
 import requests
-from constants import SEND_USERNAME_URL
+from constants import BATCH_SIZE
 
 
 @application.cli.command('test_cmd')
@@ -32,7 +32,8 @@ def insta_login():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   batch = get_user_name_batch(5)
+   batch = get_user_name_batch(BATCH_SIZE)
+   # batch = {'i.kishanrajput': '', }
    if batch:
       print(process_reels.process_reels(batch))
    return

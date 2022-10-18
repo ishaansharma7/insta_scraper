@@ -1,7 +1,8 @@
+from pprint import pprint
 import requests
 import json
 import traceback
-from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL
+from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL
 from datetime import datetime
 
 
@@ -98,12 +99,23 @@ def number_clean_up(clean_value):
 
 def return_status_resp(user_name_status: dict, scraping_id_status: dict):
     try:
-        f_resp = {'user_name_status': [],}
+        user_name_list = []
         for k, v in user_name_status.items():
             v['user_name'] = k
-            f_resp['user_name_status'].append(v)
-        print(f_resp)
+            user_name_list.append(v)
         update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
+
+        url = USER_NAME_STATUS_URL
+        payload = json.dumps({
+        "user_name_status": user_name_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        print('user_name_list-------')
+        pprint(user_name_list)
+
     except Exception:
         traceback.print_exc()
     return
