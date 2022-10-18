@@ -1,3 +1,4 @@
+from pprint import pprint
 import requests
 import json
 import traceback
@@ -112,6 +113,8 @@ def return_status_resp(user_name_status: dict, scraping_id_status: dict):
         'Content-Type': 'application/json',
         }
         response = requests.request("POST", url, headers=headers, data=payload)
+        print('user_name_list-------')
+        pprint(user_name_list)
 
     except Exception:
         traceback.print_exc()

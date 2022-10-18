@@ -5,6 +5,9 @@ load_dotenv()
 
 CHROMEDRIVER = os.environ['CHROMEDRIVER']
 HEADLESS = True if os.environ['HEADLESS'] == '1' else False
+CRED_AVAILABLE = True if os.environ['CRED_AVAILABLE'] == '1' else False
+USER_NAME = os.environ['USER_NAME']
+PASSWORD = os.environ['PASSWORD']
 CONSECUTIVE_FAIL_LIMIT = int(os.environ['CONSECUTIVE_FAIL_LIMIT'])
 SELENIUM_FAIL_LIMIT = int(os.environ['SELENIUM_FAIL_LIMIT'])
 

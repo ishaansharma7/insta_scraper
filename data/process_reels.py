@@ -6,7 +6,7 @@ import pandas as pd
 import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_reel_details, get_user_details
-from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT
+from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD
 import requests
 import json
 from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api
@@ -26,7 +26,10 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
 
 def process_reels(batch: dict):
 
-    scraping_id, password = request_scraping_creds()
+    if CRED_AVAILABLE:
+        scraping_id, password = USER_NAME, PASSWORD
+    else:
+        scraping_id, password = request_scraping_creds()
     if not scraping_id or not password:
         print('problem in fetching scrape id creds, exiting-----')
         return
