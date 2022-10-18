@@ -76,16 +76,19 @@ def process_reels(batch=None):
                 scraping_id, password = request_scraping_creds(False, scraping_id, 'banned')
                 if not scraping_id or not password:
                     print('problem in fetching scrape id creds, exiting-----')
+                    return_status_resp(user_name_status, scraping_id_status)
                     return
                 login_success, driver = do_insta_login(scraping_id, password)
                 if not login_success:
                     print('login failed exiting------')
-                    return response
+                    return_status_resp(user_name_status, scraping_id_status)
+                    return
                 scraping_id_status['scrape_id'] = scraping_id
                 scraping_id_status['status'] = 'in_use'
             elif curr_health == 'selenium code break':
                 print('selenium code break-------')
-                return response
+                return_status_resp(user_name_status, scraping_id_status)
+                return
 
         ###################### pd dataframe ######################
         media_df = pd.DataFrame(columns=["user_name", "media_url", "shortcode", "comments_count", "like_count", "view_count", "user_id"])
