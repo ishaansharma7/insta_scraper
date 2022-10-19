@@ -158,7 +158,10 @@ def process_reels(batch=None):
         else:
             selenium_fail_ct = 0
             print(f'{user_name} scraped------')
-            user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
+            if len(media_df) == 0:
+                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'no reels uploaded'}})
+            else:
+                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
         reels_data_to_api(media_df)

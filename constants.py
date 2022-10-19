@@ -16,9 +16,9 @@ SELENIUM_FAIL_LIMIT = int(os.environ['SELENIUM_FAIL_LIMIT'])
 BATCH_SIZE = int(os.environ['BATCH_SIZE'])
 
 API_BASE_URL=os.environ['API_BASE_URL']
-SEND_USERNAME_URL= API_BASE_URL + '/manager/send/user-names/'
-UPDATE_SCRAPEID_STATUS_URL = API_BASE_URL + '/manager/update/status/scrape-id/'
-SEND_SCRAPEID_URL = API_BASE_URL + '/manager/send/scrape-id/'
-REELS_DATA_URL = API_BASE_URL + '/manager/update/reels-data/'
-USER_DATA_URL = API_BASE_URL + '/manager/update/user-data/'
-USER_NAME_STATUS_URL = API_BASE_URL + '/manager/update/status/user-name/'
+SEND_USERNAME_URL= API_BASE_URL + '/v1/instagram/manager/send/user-names/'
+UPDATE_SCRAPEID_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/status/scrape-id/'
+SEND_SCRAPEID_URL = API_BASE_URL + '/v1/instagram/manager/send/scrape-id/'
+REELS_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/reels-data/'
+USER_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/user-data/'
+USER_NAME_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/status/user-name/'
