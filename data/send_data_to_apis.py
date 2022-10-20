@@ -97,14 +97,19 @@ def number_clean_up(clean_value):
 		pass
 	return clean_value
 
-def return_status_resp(user_name_status: dict, scraping_id_status: dict):
+def return_status_resp(user_name_status: dict, scraping_id_status: dict=None):
     try:
         user_name_list = []
         for k, v in user_name_status.items():
+            if 'resp_send' in v: continue
             v['user_name'] = k
+            v['resp_send'] = True
             user_name_list.append(v)
-        update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
 
+        if scraping_id_status:
+            update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
+        
+        if not len(user_name_list): return
         url = USER_NAME_STATUS_URL
         payload = json.dumps({
         "user_name_status": user_name_list,

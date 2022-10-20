@@ -33,7 +33,7 @@ def insta_login():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   # batch = {'i.kishanrajput': '', }
+   # batch = {'anushkasalunke_16': '', }
    print(process_reels.process_reels())
    return
 

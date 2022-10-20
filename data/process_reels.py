@@ -106,15 +106,18 @@ def process_reels(batch=None):
         if not check_handle_valid(driver):
             failed_scrape_list.append(user_name)
             consecutive_fail_ct += 1
+            user_name_status.update({user_name:{'status': 'failed', 'reason': 'user name changed'}})
+            return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
-        else:
-            consecutive_fail_ct = 0
-            user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
-            failed_scrape_list.clear()
+        # else:
+        #     consecutive_fail_ct = 0
+        #     user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
+        #     failed_scrape_list.clear()
 
         if user_handle_pvt(driver):
             user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
+            return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
 
@@ -165,6 +168,7 @@ def process_reels(batch=None):
 
         # here add the db code
         reels_data_to_api(media_df)
+        return_status_resp({user_name:user_name_status[user_name]})
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
