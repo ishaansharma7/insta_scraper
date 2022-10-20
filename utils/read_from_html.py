@@ -1,6 +1,9 @@
 import traceback
 from bs4 import BeautifulSoup
 import pandas as pd
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def get_reel_details(contents, user_name, user_id, media_df):
@@ -41,7 +44,60 @@ def get_reel_details(contents, user_name, user_id, media_df):
     return media_df, True
 
 
-def get_user_details(contents, user_name, user_id):
+def get_user_details(driver, user_name, user_id):
+    user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type"])
+    user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
+    try:
+        user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
+        post_count = user_stats[0].text
+        followers_count = user_stats[1].text
+        following_count = user_stats[2].text
+
+        desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
+        name_span = desc.find_elements_by_tag_name("span")
+        bio_div = desc.find_elements_by_tag_name("div")
+
+
+        if name_span:
+            user_actual_name = name_span[0].text
+        else:
+            user_actual_name = ''
+
+        if bio_div:
+            bio_text = ''
+            for each_ele in bio_div:
+                bio_text += each_ele.text
+            bio_text = bio_text.replace(user_actual_name, '').replace('\n', ' ')
+            bio = bio_text
+        
+        beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
+        reel_div = beautifulSoupText.find('main')
+        if reel_div:
+            # profile_header = reel_div.find("header", attrs={"class": "_aa_h"})
+            profile_header = reel_div.find("header", attrs={"class": "x1gv9v1y x1dgd101 x186nx3s x1n2onr6 x2lah0s x1q0g3np x78zum5 x1qjc9v5 xlue5dm x1tb5o9v"})
+            if profile_header:
+                insta_user_name = profile_header.find("h2").text
+                profile_url = profile_header.find("img")["src"]
+        user_df = user_df.append({
+                                "user_id" : user_id,
+                                "user_name" : user_name,
+                                "insta_user_name" : insta_user_name, 
+                                "profile_url" : profile_url, 
+                                "post_count": post_count, 
+                                "followers_count" : followers_count, 
+                                "following_count" : following_count, 
+                                "bio" : bio, 
+                                "account_type" : private_account_status,
+                                "account_exists_status" : account_exists_status
+                            }, ignore_index=True)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        return user_df
+
+
+def get_user_details2(driver, user_name, user_id):
+    contents = driver.page_source
     user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type"])
     user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
     try:

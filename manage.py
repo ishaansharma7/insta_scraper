@@ -8,15 +8,15 @@ import time
 from scripts.test_script import hello_world
 from data import one_time_insta_login
 from data import process_reels
-from data.send_data_to_apis import get_user_name_batch
+from data.one_time_insta_login import do_insta_login
+from data.scrape_profile_details import get_account_details
 from kafka import KafkaConsumer
 import json
 import traceback
 from scripts.kafka_producer import send_to_insta_kafka
 import requests
-from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS
+from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
-from utils.exist_check import check_if_logged_in
 
 
 @application.cli.command('test_cmd')
@@ -24,17 +24,24 @@ def func_test_cmd():
    hello_world()
 
 
-@application.cli.command('login_check')
-def insta_login():
-   driver = get_web_driver(CHROMEDRIVER, HEADLESS)
-   print(check_if_logged_in(driver))
-   return
+@application.cli.command('user_details')
+def user_details():
+   if CRED_AVAILABLE:
+      scraping_id, password = USER_NAME, PASSWORD
+   else:
+      print('no creds for login-----')
+      return
+   driver = get_web_driver(CHROMEDRIVER, False)
+   # _, driver = do_insta_login(scraping_id, password)
+   val = get_account_details(driver)
+   return val
 
 
 @application.cli.command('process_reels')
 def process_reels_func():
    # batch = {'anushkasalunke_16': '', }
    print(process_reels.process_reels())
+   print('\n \n \n')
    return
 
 
