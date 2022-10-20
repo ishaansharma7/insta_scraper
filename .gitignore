@@ -25,3 +25,4 @@ config/staging.cfg
 env/
 selenium_session
 *.xlsx
+log.txt

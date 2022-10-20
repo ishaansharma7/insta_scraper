@@ -17,7 +17,6 @@ from scripts.kafka_producer import send_to_insta_kafka
 import requests
 from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
-from utils.exist_check import check_if_logged_in
 
 
 @application.cli.command('test_cmd')
@@ -42,6 +41,7 @@ def user_details():
 def process_reels_func():
    # batch = {'anushkasalunke_16': '', }
    print(process_reels.process_reels())
+   print('\n \n \n')
    return
 
 
