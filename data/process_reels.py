@@ -6,11 +6,12 @@ import pandas as pd
 import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_reel_details, get_user_details
-from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION
+from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
 import requests
 import json
-from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api
+from data.send_data_to_apis import request_scraping_creds, return_status_resp, reels_data_to_api, user_data_to_api, get_user_name_batch
 from utils.selenium_driver import get_web_driver
+from utils.exist_check import check_if_logged_in
 
 
 def health_check(consecutive_fail_ct, selenium_fail_ct):
@@ -24,8 +25,9 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
 
 
 
-def process_reels(batch: dict):
+def process_reels(batch=None):
 
+    ###################### login id and password ######################
     if CRED_AVAILABLE:
         scraping_id, password = USER_NAME, PASSWORD
     else:
@@ -33,16 +35,26 @@ def process_reels(batch: dict):
     if not scraping_id or not password:
         print('problem in fetching scrape id creds, exiting-----')
         return
-        
+    
+    ###################### session usage ######################
     if REUSE_SESSION:
-        login_success, driver = True, get_web_driver(CHROMEDRIVER, HEADLESS)
+        driver = get_web_driver(CHROMEDRIVER, HEADLESS)
+        login_success = check_if_logged_in(driver)
     else:
         login_success, driver = do_insta_login(scraping_id, password)
     if not login_success:
         print('login failed exiting------')
         return
         # handle this case
-
+    
+    ###################### get batch ######################
+    if not batch:
+        batch = get_user_name_batch(BATCH_SIZE)
+        if not batch:
+            print('problem in getting batch-----')
+            return
+    
+    ###################### variables ######################
     user_name_status = {k: {'status': 'not_scraped', 'reason': 'scraping not started'} for k, v in batch.items()}
     failed_scrape_list = []
     consecutive_fail_ct = 0     # help to identify scraping ID banned or not
@@ -64,16 +76,19 @@ def process_reels(batch: dict):
                 scraping_id, password = request_scraping_creds(False, scraping_id, 'banned')
                 if not scraping_id or not password:
                     print('problem in fetching scrape id creds, exiting-----')
+                    return_status_resp(user_name_status, scraping_id_status)
                     return
                 login_success, driver = do_insta_login(scraping_id, password)
                 if not login_success:
                     print('login failed exiting------')
-                    return response
+                    return_status_resp(user_name_status, scraping_id_status)
+                    return
                 scraping_id_status['scrape_id'] = scraping_id
                 scraping_id_status['status'] = 'in_use'
             elif curr_health == 'selenium code break':
                 print('selenium code break-------')
-                return response
+                return_status_resp(user_name_status, scraping_id_status)
+                return
 
         ###################### pd dataframe ######################
         media_df = pd.DataFrame(columns=["user_name", "media_url", "shortcode", "comments_count", "like_count", "view_count", "user_id"])
@@ -91,15 +106,18 @@ def process_reels(batch: dict):
         if not check_handle_valid(driver):
             failed_scrape_list.append(user_name)
             consecutive_fail_ct += 1
+            user_name_status.update({user_name:{'status': 'failed', 'reason': 'user name changed'}})
+            return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
-        else:
-            consecutive_fail_ct = 0
-            user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
-            failed_scrape_list.clear()
+        # else:
+        #     consecutive_fail_ct = 0
+        #     user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
+        #     failed_scrape_list.clear()
 
         if user_handle_pvt(driver):
             user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
+            return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
 
@@ -143,10 +161,14 @@ def process_reels(batch: dict):
         else:
             selenium_fail_ct = 0
             print(f'{user_name} scraped------')
-            user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
+            if len(media_df) == 0:
+                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'no reels uploaded'}})
+            else:
+                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
         reels_data_to_api(media_df)
+        return_status_resp({user_name:user_name_status[user_name]})
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)

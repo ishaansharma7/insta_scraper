@@ -33,16 +33,16 @@ def check_handle_valid(driver):
     return valid_handle
 
 
-def check_handle_valid2(driver):
-    valid_handle = True
+def check_if_logged_in(driver):
+    driver.get('https://www.instagram.com/')
+    logged_in = False
     try:
-        page_not_avail =  WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mount_0_0_CF"]/div/div/div/div[1]/div/div/div/div[1]/section/main/div/div')))
-        valid_handle = False
-        print('not a valid user handle!!!--------')
+        username_field =  WebDriverWait(driver,5).until(EC.presence_of_all_elements_located((By.NAME, 'username')))
+        print('No login session present!!!--------')
     except Exception:
-        traceback.print_exc()
-        print('valid user handle--------')
-    return valid_handle
+        logged_in = True
+        print('login session present--------')
+    return logged_in
 
 
 def user_handle_pvt(driver):
