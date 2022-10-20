@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 from time import sleep
 import traceback
 from utils.selenium_driver import get_web_driver
@@ -29,6 +30,34 @@ def get_account_details(driver, acc_name='ishaansharma711'):
         'scrape_status': 'failed'
     }
 
+    user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
+    for each in user_stats:
+        print('each------', each.text)
+
+    try:
+        print('r1------')
+        desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
+        print('r2------')
+        name_span = desc.find_elements_by_tag_name("span")
+        bio_div = desc.find_elements_by_tag_name("div")
+        print('r3------')
+        user_details['name'] = ''
+        user_details['bio'] = ''
+        if name_span:
+            user_details['name'] = name_span[0].text
+        if bio_div:
+            bio_text = ''
+            for each_ele in bio_div:
+                bio_text += each_ele.text
+            bio_text = bio_text.replace(user_details['name'], '').replace('\n', ' ')
+            user_details['bio'] = bio_text
+            user_details['scrape_status'] = 'complete'
+        pprint(user_details)
+    except Exception:
+        traceback.print_exc()
+        print('bio failure----')
+    sleep(500)
+    return
     # scrape profile pic url if public
     try:
         img_ele =  WebDriverWait(driver,8).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa8j')))
@@ -79,6 +108,8 @@ def get_account_details(driver, acc_name='ishaansharma711'):
     except TimeoutException:
         user_details['privacy_status'] = 'public'
 
+    pprint(user_details)
+    sleep(1000)
     return user_details
 
 if __name__ == '__main__':
