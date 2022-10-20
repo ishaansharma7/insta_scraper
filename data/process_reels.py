@@ -123,7 +123,7 @@ def process_reels(batch=None):
 
 
         try:
-            user_df = get_user_details(driver.page_source, user_name, user_id)
+            user_df = get_user_details(driver, user_name, user_id)
             user_data_to_api(user_df)
             user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
