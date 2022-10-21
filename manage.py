@@ -39,8 +39,14 @@ def user_details():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   # batch = {'anushkasalunke_16': '', }
-   print(process_reels.process_reels())
+   batch = {
+      # 'sani_singh_41': '',
+      # 'rohan.bajwa97': '',
+      'i_am_srk_2': '',
+      # 'fan_aewdon': '',
+      # 'vasums': '',
+      }
+   print(process_reels.process_reels(batch))
    print('\n \n \n')
    return
 

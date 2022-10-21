@@ -26,3 +26,4 @@ env/
 selenium_session
 *.xlsx
 log.txt
+*_log.txt

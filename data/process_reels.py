@@ -76,18 +76,18 @@ def process_reels(batch=None):
                 scraping_id, password = request_scraping_creds(False, scraping_id, 'banned')
                 if not scraping_id or not password:
                     print('problem in fetching scrape id creds, exiting-----')
-                    return_status_resp(user_name_status, scraping_id_status)
+                    # return_status_resp(user_name_status, scraping_id_status)
                     return
                 login_success, driver = do_insta_login(scraping_id, password)
                 if not login_success:
                     print('login failed exiting------')
-                    return_status_resp(user_name_status, scraping_id_status)
+                    # return_status_resp(user_name_status, scraping_id_status)
                     return
                 scraping_id_status['scrape_id'] = scraping_id
                 scraping_id_status['status'] = 'in_use'
             elif curr_health == 'selenium code break':
                 print('selenium code break-------')
-                return_status_resp(user_name_status, scraping_id_status)
+                # return_status_resp(user_name_status, scraping_id_status)
                 return
 
         ###################### pd dataframe ######################
@@ -107,7 +107,7 @@ def process_reels(batch=None):
             failed_scrape_list.append(user_name)
             consecutive_fail_ct += 1
             user_name_status.update({user_name:{'status': 'failed', 'reason': 'user name changed'}})
-            return_status_resp({user_name:user_name_status[user_name]})
+            # return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
         # else:
@@ -117,14 +117,14 @@ def process_reels(batch=None):
 
         if user_handle_pvt(driver):
             user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
-            return_status_resp({user_name:user_name_status[user_name]})
+            # return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
 
 
         try:
             user_df = get_user_details(driver, user_name, user_id)
-            user_data_to_api(user_df)
+            # user_data_to_api(user_df)
             user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
             print(e)
@@ -167,11 +167,11 @@ def process_reels(batch=None):
                 user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
 
         # here add the db code
-        reels_data_to_api(media_df)
-        return_status_resp({user_name:user_name_status[user_name]})
+        # reels_data_to_api(media_df)
+        # return_status_resp({user_name:user_name_status[user_name]})
         media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
     scraping_id_status['status'] = 'free'
-    return_status_resp(user_name_status, scraping_id_status)
+    # return_status_resp(user_name_status, scraping_id_status)
     return 'completed----'
