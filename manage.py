@@ -17,6 +17,8 @@ from scripts.kafka_producer import send_to_insta_kafka
 import requests
 from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
+from time import time
+from datetime import timedelta
 
 
 @application.cli.command('test_cmd')
@@ -39,8 +41,22 @@ def user_details():
 
 @application.cli.command('process_reels')
 def process_reels_func():
-   # batch = {'anushkasalunke_16': '', }
-   print(process_reels.process_reels())
+   batch = None
+   # batch = {
+   #    # 'sani_singh_41': '',
+   #    # 'rohan.bajwa97': '',
+   #    # 'i_am_srk_2': '',
+   #    # 'fan_aewdon': '',
+   #    # 'vasums': '',
+   #    }
+   print('start time-----',datetime.now())
+   start_epoch = time()
+
+   print(process_reels.process_reels(batch))
+
+   print('end time-----',datetime.now())
+   end_seconds = time() - start_epoch
+   print('total duration-----', timedelta(seconds=end_seconds))
    print('\n \n \n')
    return
 

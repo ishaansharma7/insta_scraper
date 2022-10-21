@@ -1,3 +1,5 @@
+from pprint import pprint
+from time import sleep
 import traceback
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -23,12 +25,39 @@ def get_reel_details(contents, user_name, user_id, media_df):
                     for item in div_list:
                         media_url = item['style']
                         media_url = media_url[media_url.index("(\"")+2 : media_url.index("\")")]
-                    
                     span_list = div.find_all("span")
-                    if span_list:
-                        like_count = span_list[0].string
-                        comments_count = span_list[2].string
-                        view_count = span_list[4].string
+                    try:
+                        # print('-----',span_list, '------')
+                        if span_list:
+                            like_count = span_list[0].string
+                            stat_dict = {'comments_count': 0, 'view_count':0}
+                            key = ''
+                            for span in span_list[1:]:
+                                if 'class' in span.attrs and span.attrs['class'][-1] == '_9-j_':
+                                    key = 'comments_count'
+                                    continue
+                                elif 'class' in span.attrs and span.attrs['class'][-1] == '_9-k0':
+                                    key = 'view_count'
+                                    continue
+                                else:
+                                    stat_dict[key] = span.string
+                            comments_count = stat_dict["comments_count"]
+                            view_count = stat_dict["view_count"]
+
+                            # comments_count = span_list[2].string
+                            # view_count = span_list[4].string
+                        # val_list = [0 for i in range(3)]
+                        # idx = 0
+                        # for span in span_list:
+                        #     if span.string != '' and idx <= 2:
+                        #         val_list[idx] = span.string
+                        #         idx += 1
+                        # print('val_list----', val_list)
+                        # like_count, comments_count, view_count = val_list
+
+                    except Exception:
+                        traceback.print_exc()
+                        print('failed to get like,comment and views count-------')
                     media_df = media_df.append({
                                 "user_id" : user_id,
                                 "user_name" : user_name, 
@@ -38,6 +67,7 @@ def get_reel_details(contents, user_name, user_id, media_df):
                                 "comments_count" : comments_count,
                                 "view_count" : view_count
                                 }, ignore_index=True)
+                    # print('worked till here------')
     except Exception as e:
         traceback.print_exc()
         return media_df, False
@@ -69,6 +99,8 @@ def get_user_details(driver, user_name, user_id):
                 bio_text += each_ele.text
             bio_text = bio_text.replace(user_actual_name, '').replace('\n', ' ')
             bio = bio_text
+        else:
+            bio = ''
         
         beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
         reel_div = beautifulSoupText.find('main')
@@ -78,6 +110,9 @@ def get_user_details(driver, user_name, user_id):
             if profile_header:
                 insta_user_name = profile_header.find("h2").text
                 profile_url = profile_header.find("img")["src"]
+    except Exception:
+        traceback.print_exc()
+    finally:
         user_df = user_df.append({
                                 "user_id" : user_id,
                                 "user_name" : user_name,
@@ -87,12 +122,9 @@ def get_user_details(driver, user_name, user_id):
                                 "followers_count" : followers_count, 
                                 "following_count" : following_count, 
                                 "bio" : bio, 
-                                "account_type" : private_account_status,
+                                "account_type" : False,
                                 "account_exists_status" : account_exists_status
                             }, ignore_index=True)
-    except Exception:
-        traceback.print_exc()
-    finally:
         return user_df
 
 

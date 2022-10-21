@@ -46,7 +46,7 @@ def process_reels(batch=None):
         print('login failed exiting------')
         return
         # handle this case
-    
+    print('scraping id in use-----', scraping_id)
     ###################### get batch ######################
     if not batch:
         batch = get_user_name_batch(BATCH_SIZE)
@@ -70,6 +70,7 @@ def process_reels(batch=None):
         curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
         if curr_health:
             if curr_health == 'scraping id banned':
+                print('banned id-----', scraping_id)
                 driver.quit()
                 consecutive_fail_ct = 0
                 failed_scrape_list.clear()
@@ -83,6 +84,7 @@ def process_reels(batch=None):
                     print('login failed exiting------')
                     return_status_resp(user_name_status, scraping_id_status)
                     return
+                print('new scraping id-----', scraping_id)
                 scraping_id_status['scrape_id'] = scraping_id
                 scraping_id_status['status'] = 'in_use'
             elif curr_health == 'selenium code break':
@@ -110,8 +112,8 @@ def process_reels(batch=None):
             return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
-        # else:
-        #     consecutive_fail_ct = 0
+        else:
+            consecutive_fail_ct = 0
         #     user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
         #     failed_scrape_list.clear()
 
@@ -174,4 +176,4 @@ def process_reels(batch=None):
         sleep(wait_time)
     scraping_id_status['status'] = 'free'
     return_status_resp(user_name_status, scraping_id_status)
-    return 'completed----'
+    return 'batch scraping completed----'

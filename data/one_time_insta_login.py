@@ -66,7 +66,6 @@ def do_insta_login(USER_NAME, PASSWORD):
             print('removing previous session------')
             shutil.rmtree(session_path)
         driver = get_web_driver(CHROMEDRIVER, HEADLESS)
-        driver.maximize_window()
         url = "https://www.instagram.com/"
         driver.get(url)
         automated_login(driver, USER_NAME, PASSWORD)

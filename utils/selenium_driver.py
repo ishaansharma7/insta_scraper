@@ -13,4 +13,6 @@ def get_web_driver(CHROMEDRIVER, headless=False):
         opt.add_argument('--disable-dev-shm-usage')
         opt.add_argument('--disable-gpu')
     opt.add_argument("user-data-dir=selenium_session")
-    return webdriver.Chrome(executable_path=DRIVER_BIN, options=opt)
+    driver = webdriver.Chrome(executable_path=DRIVER_BIN, options=opt)
+    driver.maximize_window()
+    return driver
