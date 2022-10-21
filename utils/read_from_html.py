@@ -27,7 +27,7 @@ def get_reel_details(contents, user_name, user_id, media_df):
                         media_url = media_url[media_url.index("(\"")+2 : media_url.index("\")")]
                     span_list = div.find_all("span")
                     try:
-                        print('-----',span_list, '------')
+                        # print('-----',span_list, '------')
                         if span_list:
                             like_count = span_list[0].string
                             stat_dict = {'comments_count': 0, 'view_count':0}
@@ -57,7 +57,7 @@ def get_reel_details(contents, user_name, user_id, media_df):
 
                     except Exception:
                         traceback.print_exc()
-                        print('out of index-------')
+                        print('failed to get like,comment and views count-------')
                     media_df = media_df.append({
                                 "user_id" : user_id,
                                 "user_name" : user_name, 
