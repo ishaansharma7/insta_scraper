@@ -99,6 +99,8 @@ def get_user_details(driver, user_name, user_id):
                 bio_text += each_ele.text
             bio_text = bio_text.replace(user_actual_name, '').replace('\n', ' ')
             bio = bio_text
+        else:
+            bio = ''
         
         beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
         reel_div = beautifulSoupText.find('main')
@@ -120,7 +122,7 @@ def get_user_details(driver, user_name, user_id):
                                 "followers_count" : followers_count, 
                                 "following_count" : following_count, 
                                 "bio" : bio, 
-                                "account_type" : private_account_status,
+                                "account_type" : False,
                                 "account_exists_status" : account_exists_status
                             }, ignore_index=True)
         return user_df
