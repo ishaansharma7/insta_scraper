@@ -19,6 +19,7 @@ from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_N
 from utils.selenium_driver import get_web_driver
 from time import time
 from datetime import timedelta
+from data.highlights_data import get_high_data
 
 
 @application.cli.command('test_cmd')
@@ -35,8 +36,9 @@ def user_details():
       return
    driver = get_web_driver(CHROMEDRIVER, False)
    # _, driver = do_insta_login(scraping_id, password)
-   val = get_account_details(driver)
-   return val
+   # val = get_account_details(driver)
+   get_high_data(driver)
+   return
 
 
 @application.cli.command('process_reels')
