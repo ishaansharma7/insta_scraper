@@ -7,6 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
+from data.highlights_data import get_high_data
+
 
 def get_reel_details(contents, user_name, user_id, media_df):
     try:
@@ -75,13 +77,15 @@ def get_reel_details(contents, user_name, user_id, media_df):
 
 
 def get_user_details(driver, user_name, user_id):
-    user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type"])
+    user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type","account_exists_status", "highlights"])
     user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
+    highlight_list = []
     try:
         user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
         post_count = user_stats[0].text
         followers_count = user_stats[1].text
         following_count = user_stats[2].text
+        highlight_list = get_high_data(driver)
 
         desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
         name_span = desc.find_elements_by_tag_name("span")
@@ -123,7 +127,8 @@ def get_user_details(driver, user_name, user_id):
                                 "following_count" : following_count, 
                                 "bio" : bio, 
                                 "account_type" : False,
-                                "account_exists_status" : account_exists_status
+                                "account_exists_status" : account_exists_status,
+                                "highlights": highlight_list
                             }, ignore_index=True)
         return user_df
 
