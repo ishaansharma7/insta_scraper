@@ -6,10 +6,7 @@ import os
 application = create_app()
 import time
 from scripts.test_script import hello_world
-from data import one_time_insta_login
 from data import process_reels
-from data.one_time_insta_login import do_insta_login
-from data.scrape_profile_details import get_account_details
 from kafka import KafkaConsumer
 import json
 import traceback
@@ -49,7 +46,7 @@ def process_reels_func():
       # 'rohan.bajwa97': '',
       # 'i_am_srk_2': '',
       # 'fan_aewdon': '',
-      '__.aarru.__': '',
+      'anuj.suman': '',
       }
    print('start time-----',datetime.now())
    start_epoch = time()

@@ -64,8 +64,21 @@ def user_data_to_api(user_df):
         followers_count_int = number_clean_up(row["followers_count"])
         following_count_int = number_clean_up(row["following_count"])
         post_count_int = number_clean_up(row["post_count"])
-        c_row = [row["insta_user_name"], row["profile_url"], row["user_name"], row["bio"], row["post_count"], row["followers_count"], row["following_count"], row["account_type"],
-						followers_count_int, following_count_int, post_count_int, str(datetime.now().date())]
+        c_row = {
+            'insta_user_name':row["insta_user_name"],
+            'profile_url':row["profile_url"],
+            'user_name':row["user_name"],
+            'bio':row["bio"],
+            'post_count':row["post_count"],
+            'followers_count':row["followers_count"],
+            'following_count': row["following_count"],
+            'account_type':row["account_type"],
+			'followers_count_int':followers_count_int,
+            'following_count_int':following_count_int,
+            'post_count_int':post_count_int,
+            'last_updated':str(datetime.now().date()),
+            'highlights':row["highlights"]
+        }
         user_list.append(c_row)
     try:
         url = USER_DATA_URL
