@@ -41,9 +41,19 @@ def reels_data_to_api(media_df):
         comments_count_int = number_clean_up(row["comments_count"])
         like_count_int = number_clean_up(row["like_count"])
         view_count_int = number_clean_up(row["view_count"])
-        c_row = [row["user_name"], row["media_url"], row["shortcode"], row["comments_count"], 
-					row["like_count"], row["view_count"], row["user_id"], str(datetime.now().date()),
-                    like_count_int, comments_count_int, view_count_int]
+        c_row = {
+            'user_name': row["user_name"],
+            'media_url': row["media_url"],
+            'shortcode': row["shortcode"],
+            'comments_count': row["comments_count"],
+			'like_count': row["like_count"],
+            'view_count': row["view_count"],
+            'user_id': row["user_id"],
+            'last_updated': str(datetime.now().date()),
+            'like_count_int': like_count_int,
+            'comments_count_int': comments_count_int,
+            'view_count_int': view_count_int
+        }
         reel_list.append(c_row)
     try:
         url = REELS_DATA_URL
