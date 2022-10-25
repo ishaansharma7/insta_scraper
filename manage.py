@@ -41,13 +41,13 @@ def user_details():
 @application.cli.command('process_reels')
 def process_reels_func():
    batch = None
-   batch = {
+   # batch = {
       # 'sani_singh_41': '',
       # 'rohan.bajwa97': '',
       # 'i_am_srk_2': '',
       # 'fan_aewdon': '',
-      'anuj.suman': '',
-      }
+      # 'anuj.suman': '',
+   #    }
    print('start time-----',datetime.now())
    start_epoch = time()
 
