@@ -128,7 +128,7 @@ def process_reels(batch=None):
             pass
 
         if user_pvt:
-            user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
+            user_name_status.update({user_name: {'status': 'scraped', 'reason': 'private account'}})
             return_status_resp({user_name:user_name_status[user_name]})
             print('skipping further process------')
             continue
