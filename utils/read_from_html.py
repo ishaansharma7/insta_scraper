@@ -76,7 +76,7 @@ def get_reel_details(contents, user_name, user_id, media_df):
     return media_df, True
 
 
-def get_user_details(driver, user_name, user_id):
+def get_user_details(driver, user_name, user_id, user_pvt=False):
     user_df = pd.DataFrame(columns=["user_id", "user_name", "insta_user_name", "profile_url", "post_count", "followers_count", "following_count", "bio", "account_type","account_exists_status", "highlights"])
     user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
     highlight_list = []
@@ -85,7 +85,8 @@ def get_user_details(driver, user_name, user_id):
         post_count = user_stats[0].text
         followers_count = user_stats[1].text
         following_count = user_stats[2].text
-        highlight_list = get_high_data(driver)
+        if not user_pvt:
+            highlight_list = get_high_data(driver)
 
         desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
         name_span = desc.find_elements_by_tag_name("span")

@@ -62,10 +62,11 @@ def process_reels(batch=None):
     scraping_id_status = {'scrape_id': scraping_id, 'status': 'in_use'}
     response = {'batch_status': user_name_status, 'scraping_id_status': scraping_id_status, }
 
-
+    curr_num = 1
     for user_name, user_id in batch.items():
         print('**********************************************')
-
+        print(f'currently on number {curr_num} -----')
+        curr_num += 1
         ###################### health check process ######################
         curr_health = health_check(consecutive_fail_ct, selenium_fail_ct)
         if curr_health:
@@ -116,22 +117,21 @@ def process_reels(batch=None):
             consecutive_fail_ct = 0
         #     user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
         #     failed_scrape_list.clear()
-
-        if user_handle_pvt(driver):
-            user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
-            return_status_resp({user_name:user_name_status[user_name]})
-            print('skipping further process------')
-            continue
-
+        user_pvt = user_handle_pvt(driver)
 
         try:
-            user_df = get_user_details(driver, user_name, user_id)
+            user_df = get_user_details(driver, user_name, user_id, user_pvt)
             user_data_to_api(user_df)
             user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
             print(e)
             pass
 
+        if user_pvt:
+            user_name_status.update({user_name: {'status': 'failed', 'reason': 'private account'}})
+            return_status_resp({user_name:user_name_status[user_name]})
+            print('skipping further process------')
+            continue
 
         wait_time = random.randrange(2, 6)
         SCROLL_PAUSE_TIME = wait_time
