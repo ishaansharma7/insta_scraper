@@ -41,9 +41,19 @@ def reels_data_to_api(media_df):
         comments_count_int = number_clean_up(row["comments_count"])
         like_count_int = number_clean_up(row["like_count"])
         view_count_int = number_clean_up(row["view_count"])
-        c_row = [row["user_name"], row["media_url"], row["shortcode"], row["comments_count"], 
-					row["like_count"], row["view_count"], row["user_id"], str(datetime.now().date()),
-                    like_count_int, comments_count_int, view_count_int]
+        c_row = {
+            'user_name': row["user_name"],
+            'media_url': row["media_url"],
+            'shortcode': row["shortcode"],
+            'comments_count': row["comments_count"],
+			'like_count': row["like_count"],
+            'view_count': row["view_count"],
+            'user_id': row["user_id"],
+            'last_updated': str(datetime.now().date()),
+            'like_count_int': like_count_int,
+            'comments_count_int': comments_count_int,
+            'view_count_int': view_count_int
+        }
         reel_list.append(c_row)
     try:
         url = REELS_DATA_URL
@@ -64,8 +74,21 @@ def user_data_to_api(user_df):
         followers_count_int = number_clean_up(row["followers_count"])
         following_count_int = number_clean_up(row["following_count"])
         post_count_int = number_clean_up(row["post_count"])
-        c_row = [row["insta_user_name"], row["profile_url"], row["user_name"], row["bio"], row["post_count"], row["followers_count"], row["following_count"], row["account_type"],
-						followers_count_int, following_count_int, post_count_int, str(datetime.now().date())]
+        c_row = {
+            'insta_user_name':row["insta_user_name"],
+            'profile_url':row["profile_url"],
+            'user_name':row["user_name"],
+            'bio':row["bio"],
+            'post_count':row["post_count"],
+            'followers_count':row["followers_count"],
+            'following_count': row["following_count"],
+            'account_type':row["account_type"],
+			'followers_count_int':followers_count_int,
+            'following_count_int':following_count_int,
+            'post_count_int':post_count_int,
+            'last_updated':str(datetime.now().date()),
+            'highlights':row["highlights"]
+        }
         user_list.append(c_row)
     try:
         url = USER_DATA_URL

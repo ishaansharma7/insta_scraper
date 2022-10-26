@@ -6,10 +6,7 @@ import os
 application = create_app()
 import time
 from scripts.test_script import hello_world
-from data import one_time_insta_login
 from data import process_reels
-from data.one_time_insta_login import do_insta_login
-from data.scrape_profile_details import get_account_details
 from kafka import KafkaConsumer
 import json
 import traceback
@@ -19,6 +16,7 @@ from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_N
 from utils.selenium_driver import get_web_driver
 from time import time
 from datetime import timedelta
+from data.highlights_data import get_high_data
 
 
 @application.cli.command('test_cmd')
@@ -35,19 +33,20 @@ def user_details():
       return
    driver = get_web_driver(CHROMEDRIVER, False)
    # _, driver = do_insta_login(scraping_id, password)
-   val = get_account_details(driver)
-   return val
+   # val = get_account_details(driver)
+   get_high_data(driver)
+   return
 
 
 @application.cli.command('process_reels')
 def process_reels_func():
    batch = None
    # batch = {
-   #    # 'sani_singh_41': '',
-   #    # 'rohan.bajwa97': '',
-   #    # 'i_am_srk_2': '',
-   #    # 'fan_aewdon': '',
-   #    # 'vasums': '',
+      # 'sani_singh_41': '',
+      # 'rohan.bajwa97': '',
+      # 'i_am_srk_2': '',
+      # 'fan_aewdon': '',
+      # 'anuj.suman': '',
    #    }
    print('start time-----',datetime.now())
    start_epoch = time()
