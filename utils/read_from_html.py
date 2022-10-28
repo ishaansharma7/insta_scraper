@@ -127,7 +127,7 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
                                 "followers_count" : followers_count, 
                                 "following_count" : following_count, 
                                 "bio" : bio, 
-                                "account_type" : False,
+                                "account_type" : user_pvt,
                                 "account_exists_status" : account_exists_status,
                                 "highlights": highlight_list
                             }, ignore_index=True)

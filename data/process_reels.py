@@ -24,6 +24,16 @@ def health_check(consecutive_fail_ct, selenium_fail_ct):
     return None
 
 
+def retry_login(scraping_id, password):
+    print('login not present-----')
+    print('retrying login-----')
+    login_success, driver = do_insta_login(scraping_id, password)
+    if not login_success:
+        print('login failed exiting------')
+        return
+    return driver
+
+
 
 def process_reels(batch=None):
 
@@ -42,10 +52,16 @@ def process_reels(batch=None):
         login_success = check_if_logged_in(driver)
     else:
         login_success, driver = do_insta_login(scraping_id, password)
+
     if not login_success:
-        print('login failed exiting------')
+        print('login failed, retrying------')
+        scraping_id, password = request_scraping_creds()
+        login_success, driver = do_insta_login(scraping_id, password)
+
+    if not login_success:
+        print('login failed, exiting------')
         return
-        # handle this case
+        
     print('scraping id in use-----', scraping_id)
     ###################### get batch ######################
     if not batch:
