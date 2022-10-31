@@ -52,7 +52,8 @@ def reels_data_to_api(media_df):
             'last_updated': str(datetime.now().date()),
             'like_count_int': like_count_int,
             'comments_count_int': comments_count_int,
-            'view_count_int': view_count_int
+            'view_count_int': view_count_int,
+            'permalink': 'https://www.instagram.com/p/' + row["shortcode"]
         }
         reel_list.append(c_row)
     try:

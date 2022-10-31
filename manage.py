@@ -4,7 +4,7 @@ from main import create_app
 application = create_app()
 import time
 from scripts.test_script import hello_world
-from data import process_reels
+from data import process_batch
 from data import process_posts
 from kafka import KafkaConsumer
 import json
@@ -40,17 +40,17 @@ def user_details():
 @application.cli.command('process_reels')
 def process_reels_func():
    batch = None
-   batch = {
-      # 'sani_singh_41': '',
-      # 'rohan.bajwa97': '',
-      # 'i_am_srk_2': '',
-      # 'fan_aewdon': '',
-      'mars.hal2364': '',
-      }
+   # batch = {
+   #    # 'sani_singh_41': '',
+   #    # 'rohan.bajwa97': '',
+   #    # 'i_am_srk_2': '',
+   #    # 'fan_aewdon': '',
+   #    'anuj.suman': '',
+   #    }
    print('start time-----',datetime.now())
    start_epoch = time()
 
-   print(process_reels.process_reels(batch))
+   print(process_batch.start_batch_processing(batch))
 
    print('end time-----',datetime.now())
    end_seconds = time() - start_epoch
