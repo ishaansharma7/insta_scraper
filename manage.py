@@ -1,22 +1,21 @@
 from datetime import datetime, timedelta
-from pprint import pprint
 from flask import current_app
 from main import create_app
-import os
 application = create_app()
 import time
 from scripts.test_script import hello_world
 from data import process_reels
+from data import process_posts
 from kafka import KafkaConsumer
 import json
 import traceback
 from scripts.kafka_producer import send_to_insta_kafka
-import requests
 from constants import BATCH_SIZE, CHROMEDRIVER, HEADLESS, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
-from time import time
+from time import sleep, time
 from datetime import timedelta
 from data.highlights_data import get_high_data
+from utils.read_from_html import get_upload_dates
 
 
 @application.cli.command('test_cmd')
@@ -33,25 +32,46 @@ def user_details():
       return
    driver = get_web_driver(CHROMEDRIVER, False)
    # _, driver = do_insta_login(scraping_id, password)
-   # val = get_account_details(driver)
-   get_high_data(driver)
+   get_upload_dates(driver)
+   sleep(5)
    return
 
 
 @application.cli.command('process_reels')
 def process_reels_func():
    batch = None
-   # batch = {
+   batch = {
       # 'sani_singh_41': '',
       # 'rohan.bajwa97': '',
       # 'i_am_srk_2': '',
       # 'fan_aewdon': '',
-      # 'anuj.suman': '',
-   #    }
+      'mars.hal2364': '',
+      }
    print('start time-----',datetime.now())
    start_epoch = time()
 
    print(process_reels.process_reels(batch))
+
+   print('end time-----',datetime.now())
+   end_seconds = time() - start_epoch
+   print('total duration-----', timedelta(seconds=end_seconds))
+   print('\n \n \n')
+   return
+
+@application.cli.command('process_posts')
+def process_posts_func():
+   batch = None
+   batch = {
+      # 'sani_singh_41': '',
+      # 'rohan.bajwa97': '',
+      # 'i_am_srk_2': '',
+      # 'fan_aewdon': '',
+      'cristiano': '',
+      }
+   print('start time-----',datetime.now())
+   start_epoch = time()
+
+   print(process_posts.process_posts(batch))
 
    print('end time-----',datetime.now())
    end_seconds = time() - start_epoch

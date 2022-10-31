@@ -1,3 +1,4 @@
+from pprint import pprint
 from time import sleep
 import traceback
 from data.one_time_insta_login import do_insta_login
@@ -5,7 +6,7 @@ from flask import current_app
 import pandas as pd
 import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
-from utils.read_from_html import get_reel_details, get_user_details
+from utils.read_from_html import get_reel_details, get_user_details, get_shortcodes, get_upload_dates
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
 import requests
 import json
@@ -35,7 +36,7 @@ def retry_login(scraping_id, password):
 
 
 
-def process_reels(batch=None):
+def process_posts(batch=None):
 
     ###################### login id and password ######################
     if CRED_AVAILABLE:
@@ -116,7 +117,6 @@ def process_reels(batch=None):
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
 
-        # driver.get("https://www.instagram.com/{user_name}/reels/".format(user_name=user_name))
         driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
 
         wait_time = random.randrange(3, 5)
@@ -134,15 +134,15 @@ def process_reels(batch=None):
             consecutive_fail_ct = 0
         #     user_name_status.update(**{k: {'status': 'failed', 'reason': 'user name changed'} for k in failed_scrape_list})
         #     failed_scrape_list.clear()
-
         user_pvt = user_handle_pvt(driver)
-        try:
-            user_df = get_user_details(driver, user_name, user_id, user_pvt)
-            user_data_to_api(user_df)
-            user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
-        except Exception as e:
-            print(e)
-            pass
+
+        # try:
+        #     user_df = get_user_details(driver, user_name, user_id, user_pvt)
+        #     user_data_to_api(user_df)
+        #     user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
+        # except Exception as e:
+        #     print(e)
+        #     pass
 
         if user_pvt:
             user_name_status.update({user_name: {'status': 'scraped', 'reason': 'private account'}})
@@ -150,46 +150,16 @@ def process_reels(batch=None):
             print('skipping further process------')
             continue
 
-        ###################### scraping reels data ######################
-        driver.get("https://www.instagram.com/{user_name}/reels/".format(user_name=user_name))
-        wait_time = random.randrange(5, 7)
-        SCROLL_PAUSE_TIME = wait_time
-        count = 0
-        while count <= 5:
-            media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
-            last_height = driver.execute_script("return document.body.scrollHeight")
-
-            # Scroll down to bottom
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-            # Wait to load page
-            sleep(SCROLL_PAUSE_TIME)
-
-            # Calculate new scroll height and compare with last scroll height
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
-            count += 1
+        get_upload_dates(driver)
         
-        if len(media_df) == 0 and not sele_worked:
-            selenium_fail_ct += 1
-            print('no details scraped------')
-            continue
-        else:
-            selenium_fail_ct = 0
-            print(f'{user_name} scraped------')
-            if len(media_df) == 0:
-                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'no reels uploaded'}})
-            else:
-                user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
-
+        
         # here add the db code
-        reels_data_to_api(media_df)
-        return_status_resp({user_name:user_name_status[user_name]})
-        media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
+        # reels_data_to_api(media_df)
+        # return_status_resp({user_name:user_name_status[user_name]})
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
+    print('short_codes-----')
+    
     scraping_id_status['status'] = 'free'
-    return_status_resp(user_name_status, scraping_id_status)
+    # return_status_resp(user_name_status, scraping_id_status)
     return 'batch scraping completed----'
