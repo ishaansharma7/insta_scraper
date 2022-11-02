@@ -131,6 +131,7 @@ def return_status_resp(user_name_status: dict, scraping_id_status: dict=None):
             user_name_list.append(v)
 
         if scraping_id_status:
+            print('scraping_id_status send-----')
             update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
         
         if not len(user_name_list): return

@@ -1,7 +1,7 @@
 import pandas as pd
 from time import sleep
 import random
-from utils.read_from_html import get_reel_details
+from utils.read_from_html import get_reel_details, get_shortcodes_reels, get_full_reel_details
 from data.send_data_to_apis import reels_data_to_api, return_status_resp
 
 def process_reel(driver, user_name, user_id, user_name_status, health_vars):
@@ -10,11 +10,14 @@ def process_reel(driver, user_name, user_id, user_name_status, health_vars):
     
     ###################### scraping reels data ######################
     driver.get("https://www.instagram.com/{user_name}/reels/".format(user_name=user_name))
-    wait_time = random.randrange(5, 7)
+    wait_time = random.randrange(2, 5)
     SCROLL_PAUSE_TIME = wait_time
+    shortcode_set = []
     count = 0
     while count <= 5:
         media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
+        local_set = get_shortcodes_reels(driver)
+        shortcode_set.extend(local_set)
         last_height = driver.execute_script("return document.body.scrollHeight")
 
         # Scroll down to bottom
@@ -42,6 +45,7 @@ def process_reel(driver, user_name, user_id, user_name_status, health_vars):
         else:
             user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
     
+    get_full_reel_details(driver, shortcode_set)
     reels_data_to_api(media_df)
     return_status_resp({user_name:user_name_status[user_name]})
     media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)

@@ -113,12 +113,12 @@ def start_batch_processing(batch=None):
         
         print(user_name, user_id)
 
-        wait_time = random.randrange(3, 7)
+        wait_time = random.randrange(2, 5)
         sleep(wait_time)
 
         driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
 
-        wait_time = random.randrange(3, 5)
+        wait_time = random.randrange(2, 5)
         sleep(wait_time)
         
         ###################### checking account ######################
@@ -132,9 +132,10 @@ def start_batch_processing(batch=None):
         else:
             health_vars['consecutive_fail_ct'] = 0
 
+        ###################### scrape user info ######################
         user_pvt = user_handle_pvt(driver)
         try:
-            user_df = get_user_details(driver, user_name, user_id, user_pvt)
+            user_df, post_count = get_user_details(driver, user_name, user_id, user_pvt)
             user_data_to_api(user_df)
             user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
@@ -148,6 +149,9 @@ def start_batch_processing(batch=None):
             continue
 
         ###################### processing reels ######################
+        if post_count == 0:
+            print('no post-----')
+            continue
         process_reel(driver, user_name, user_id, user_name_status, health_vars)
         
     scraping_id_status['status'] = 'free'

@@ -7,6 +7,7 @@ import pandas as pd
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 from data.highlights_data import get_high_data
 
@@ -84,9 +85,10 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
     try:
         user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
         post_count = user_stats[0].text
+        post_count_int = int(post_count.replace(',', ''))
         followers_count = user_stats[1].text
         following_count = user_stats[2].text
-        if not user_pvt:
+        if not user_pvt or not post_count_int:
             highlight_list = get_high_data(driver)
 
         desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
@@ -133,44 +135,33 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
                                 "account_exists_status" : account_exists_status,
                                 "highlights": highlight_list
                             }, ignore_index=True)
-        return user_df
+        return user_df, post_count_int
 
 
 
-def get_upload_dates(driver):
-    count = 0
-    shortcode_set = []
-    wait_time = random.randrange(2, 6)
-    SCROLL_PAUSE_TIME = wait_time
-    while count <= 5:
-        local_set = get_shortcodes(driver)
-        shortcode_set.extend(local_set)
-        last_height = driver.execute_script("return document.body.scrollHeight")
-
-        # Scroll down to bottom
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-        # Wait to load page
-        sleep(SCROLL_PAUSE_TIME)
-
-        # Calculate new scroll height and compare with last scroll height
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
-        count += 1
-    if not shortcode_set:
-        print('no shortcode found-----')
+def get_full_reel_details(driver, shortcode_set):
+    # pprint(shortcode_set)
+    shortcode_len = len(shortcode_set)
+    if not shortcode_len:
         return
-    mid = int(len(shortcode_set)/2)
-    mid_post = shortcode_set[mid]
+
     latest_post = shortcode_set[0]
-    oldest_post  = shortcode_set[-1]
+    get_single_reel_detail(driver, latest_post)
+    if shortcode_len < 3:
+        oldest_post  = shortcode_set[-1]
+        get_single_reel_detail(driver, oldest_post)
+    else:
+        mid = int(shortcode_len/2)
+        mid_post = shortcode_set[mid]
+        get_single_reel_detail(driver, mid_post)
+        oldest_post  = shortcode_set[-1]
+        get_single_reel_detail(driver, oldest_post)
+
     # add the code for scraping data here
     # here the api for sending data
 
 
-def get_shortcodes(driver):
+def get_shortcodes_reels(driver):
     insta_url = 'https://www.instagram.com'
     shortcode_set = []
     try:
@@ -181,7 +172,7 @@ def get_shortcodes(driver):
             post_div = post_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
             for div in post_div:
                 shortcode = div['href']
-                if "/p/" in shortcode:
+                if "/reel/" in shortcode:
                     # print('shortcode-----', shortcode)
                     shortcode_set.append(insta_url+shortcode)
                     # print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
@@ -189,8 +180,38 @@ def get_shortcodes(driver):
         traceback.print_exc()
     return shortcode_set
 
-def get_single_date(driver):
-    driver.get('https://www.instagram.com/p/CkWUj0hLhnz/')
+def get_single_reel_detail(driver, post_url):
+    driver.get(post_url)
+    print(post_url)
     time_ht = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'time')))
     print('time_ht----', time_ht.get_attribute('datetime'))
+    caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
+    caption = caption_ele.find_element(By.TAG_NAME, "span")
+    caption_text = str(caption.text)
+    print('full captions----', caption_text)
+    hashtags = caption_ele.find_elements(By.TAG_NAME, "a")
+    print('hashtags-----')
+    for tag in hashtags:
+        print(tag.text)
+    # click_on_reels_tagged_users(driver)
+    print('***************')
+
+def click_on_reels_tagged_users(driver):
+    article = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+    video_div = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'x1ey2m1c x9f619 xds687c x10l6tqk x17qophe x13vifvy x1ypdohk')))
+    
+    # button.click()
+    # users_div = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_abm4')))
+    # for user_div in users_div:
+    #     print('tagged users----', user_div.text)
+    print('done')
+
+def per_hover(driver):
+    driver.get('https://www.instagram.com/cristiano/')
+    post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+    html_class = 'x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd'
+    single_post = WebDriverWait(post_grid, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'a')))
+    hover = ActionChains(driver).move_to_element(single_post)
+    hover.perform()
+    print(single_post.get_attribute('innerHTML'))
     

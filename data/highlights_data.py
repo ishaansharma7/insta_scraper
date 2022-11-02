@@ -12,15 +12,14 @@ def get_high_data(driver):
         return [ele.text for ele in ul]
     except Exception:
         print('failed to scrape highlights-----')
-        print('retrying-----')
+        print('skipping highlights-----')
         failed = True
-    if failed:
-        try:
-            sleep(5)
-            ul = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_acaz')))
-            return [ele.text for ele in ul]
-        # do logic here
-        except Exception:
-            print('unable to scrape highlights-----')
-            print('skipping highlights-----')
+    # if failed:
+    #     try:
+    #         sleep(5)
+    #         ul = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_acaz')))
+    #         return [ele.text for ele in ul]
+    #     # do logic here
+    #     except Exception:
+    #         print('unable to scrape highlights-----')
     return []
