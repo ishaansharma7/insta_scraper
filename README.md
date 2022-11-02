@@ -16,3 +16,4 @@
 
 ##Install to create log file from terminal log
 * brew install except
+* unbuffer flask process_reels |& tee -a log.txt
