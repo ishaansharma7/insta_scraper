@@ -200,14 +200,14 @@ def get_single_reel_detail(driver, post_url):
         caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
         caption = caption_ele.find_element(By.TAG_NAME, "span")
         caption1 = str(caption.text)
-        print(caption1)
+        # print(caption1)
 
         ul_section = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
         ul_section = WebDriverWait(ul_section, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
         caption = ul_section.find_element(By.CLASS_NAME, "_a9zs")
         caption = caption.find_element(By.TAG_NAME, "span")
         caption2 = str(caption.text)
-        print('new detected----', caption2)
+        # print('new detected----', caption2)
         if caption1 == caption2:
             data_dict['caption'] = None
         else:
