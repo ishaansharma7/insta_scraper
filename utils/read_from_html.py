@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-
+from data.send_data_to_apis import single_reel_data_to_api
 from data.highlights_data import get_high_data
 
 
@@ -140,25 +140,29 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
 
 
 def get_full_reel_details(driver, shortcode_set):
-    # pprint(shortcode_set)
-    shortcode_len = len(shortcode_set)
-    if not shortcode_len:
-        return
+    try:
+        # pprint(shortcode_set)
+        shortcode_len = len(shortcode_set)
+        if not shortcode_len:
+            return
 
-    latest_post = shortcode_set[0]
-    get_single_reel_detail(driver, latest_post)
-    if shortcode_len < 3:
-        oldest_post  = shortcode_set[-1]
-        get_single_reel_detail(driver, oldest_post)
-    else:
-        mid = int(shortcode_len/2)
-        mid_post = shortcode_set[mid]
-        get_single_reel_detail(driver, mid_post)
-        oldest_post  = shortcode_set[-1]
-        get_single_reel_detail(driver, oldest_post)
+        latest_post = shortcode_set[0]
+        get_single_reel_detail(driver, latest_post)
+        if shortcode_len < 3:
+            oldest_post  = shortcode_set[-1]
+            get_single_reel_detail(driver, oldest_post)
+        else:
+            mid = int(shortcode_len/2)
+            mid_post = shortcode_set[mid]
+            get_single_reel_detail(driver, mid_post)
+            oldest_post  = shortcode_set[-1]
+            get_single_reel_detail(driver, oldest_post)
 
-    # add the code for scraping data here
-    # here the api for sending data
+        # add the code for scraping data here
+        # here the api for sending data
+    except Exception:
+        traceback.print_exc()
+        print('single reel failure-----')
 
 
 def get_shortcodes_reels(driver):
@@ -182,19 +186,46 @@ def get_shortcodes_reels(driver):
 
 def get_single_reel_detail(driver, post_url):
     driver.get(post_url)
-    print(post_url)
+    data_dict = {'shortcode': None, 'caption': None, 'hashtags':[]}
+    shortcode = post_url.split('/reel/')[1].replace('/', '')
+    # print(shortcode)
+    data_dict['shortcode'] = shortcode
     time_ht = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'time')))
-    print('time_ht----', time_ht.get_attribute('datetime'))
-    caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
-    caption = caption_ele.find_element(By.TAG_NAME, "span")
-    caption_text = str(caption.text)
-    print('full captions----', caption_text)
-    hashtags = caption_ele.find_elements(By.TAG_NAME, "a")
-    print('hashtags-----')
-    for tag in hashtags:
-        print(tag.text)
+    # print('time_ht----', time_ht.get_attribute('datetime'))
+    time_str = str(time_ht.get_attribute('datetime'))
+    data_dict['media_date'] = time_str
+
+    try:
+        # caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mount_0_0_Ab"]/div/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/div[1]/div[1]/article/div/div[2]/div/div[2]/div[1]/ul/div')))
+        caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
+        caption = caption_ele.find_element(By.TAG_NAME, "span")
+        caption1 = str(caption.text)
+        print(caption1)
+
+        ul_section = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+        ul_section = WebDriverWait(ul_section, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+        caption = ul_section.find_element(By.CLASS_NAME, "_a9zs")
+        caption = caption.find_element(By.TAG_NAME, "span")
+        caption2 = str(caption.text)
+        print('new detected----', caption2)
+        if caption1 == caption2:
+            data_dict['caption'] = None
+        else:
+            data_dict['caption'] = caption1
+    except Exception:
+        print('no caption-----')
+
+    # print('full captions----', caption_text)
+    try:
+        hashtags = caption_ele.find_elements(By.TAG_NAME, "a")
+        for tag in hashtags:
+            data_dict['hashtags'].append(str(tag.text))
+    except Exception:
+        print('no hahtags')
+
+    single_reel_data_to_api(data_dict)
     # click_on_reels_tagged_users(driver)
-    print('***************')
+    # print('***************')
 
 def click_on_reels_tagged_users(driver):
     article = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
