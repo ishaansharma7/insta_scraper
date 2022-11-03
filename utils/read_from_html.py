@@ -209,11 +209,38 @@ def click_on_reels_tagged_users(driver):
 def per_hover(driver):
     driver.get('https://www.instagram.com/cristiano/')
     post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
-    html_class = 'x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd'
+    all_post = WebDriverWait(post_grid, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+    ct = 1
+    for single_post in all_post:
+        print(ct)
+        ct += 1
+        single_post.get_attribute("href")
+        hover = ActionChains(driver).move_to_element(single_post)
+        hover.perform()
+        single_post_html = single_post.get_attribute('innerHTML')
+        # print(single_post.get_attribute('innerHTML'))
+        # return
+        beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
+        shortcode = str(single_post.get_attribute("href")).split('/p/')[1].replace('/','')
+        print('shortcode-----', shortcode)
+        data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+        for data in data_div:
+            print(data.text)
+        print()
+        print()
+
+def per_hover2(driver):
+    driver.get('https://www.instagram.com/cristiano/')
+    post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
     single_post = WebDriverWait(post_grid, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'a')))
     hover = ActionChains(driver).move_to_element(single_post)
     hover.perform()
-    print(single_post.get_attribute('innerHTML'))
+    single_post_html = single_post.get_attribute('innerHTML')
+    # print(single_post.get_attribute('innerHTML'))
+    beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
+    data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+    for data in data_div:
+        print(data.text)
     
 
 

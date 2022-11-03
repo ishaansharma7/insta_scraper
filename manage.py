@@ -32,8 +32,8 @@ def user_details():
    driver = get_web_driver(CHROMEDRIVER, False)
    # _, driver = do_insta_login(scraping_id, password)
    # get_single_date(driver, 'https://www.instagram.com/reel/Cj-GcxTgBTn/')
-   # per_hover(driver)
-   process_posts(driver, 'beerbiceps', '', {}, {})
+   per_hover(driver)
+   # process_posts(driver, 'beerbiceps', '', {}, {})
    sleep(5)
    return
 
