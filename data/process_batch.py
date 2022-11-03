@@ -8,6 +8,7 @@ from data.send_data_to_apis import request_scraping_creds, return_status_resp, u
 from utils.selenium_driver import get_web_driver
 from utils.exist_check import check_if_logged_in
 from data.scrape_reels import process_reel
+from data.scrape_posts import process_posts
 
 
 def health_check(health_vars):
@@ -148,11 +149,14 @@ def start_batch_processing(batch=None):
             print('skipping further process------')
             continue
 
-        ###################### processing reels ######################
         if post_count == 0:
             print('no post-----')
             continue
+        
+        ###################### processing reels ######################
         process_reel(driver, user_name, user_id, user_name_status, health_vars)
+        ###################### processing posts ######################
+        process_posts(driver, user_name, user_id, user_name_status, health_vars)
         
     scraping_id_status['status'] = 'free'
     return_status_resp(user_name_status, scraping_id_status)

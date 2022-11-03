@@ -215,3 +215,41 @@ def per_hover(driver):
     hover.perform()
     print(single_post.get_attribute('innerHTML'))
     
+
+
+def get_post_details(contents, user_name, user_id, covered_shortcodes, media_df):
+    try:
+        beautifulSoupText = BeautifulSoup(contents, 'html.parser')
+        reel_div = beautifulSoupText.find('main')
+        if reel_div:
+            # reel_div = reel_div.find_all("a", attrs={"class":"qi72231t nu7423ey n3hqoq4p r86q59rh b3qcqh3k fq87ekyn bdao358l fsf7x5fv rse6dlih s5oniofx m8h3af8h l7ghb35v kjdc1dyq kmwttqpk srn514ro oxkhqvkx rl78xhln nch0832m cr00lzj9 rn8ck1ys s3jn8y49 icdlwmnq _a6hd", "role":"link"})
+            reel_div = reel_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
+            comments_count = like_count = view_count = None
+            media_url = shortcode = None
+            for div in reel_div:
+                shortcode = div['href']
+                if "/p/" in shortcode and shortcode not in covered_shortcodes:
+                    # print('post shortcode-----', 'https://www.instagram.com'+shortcode)
+                    covered_shortcodes[shortcode] = 1
+                    img = div.find('img')
+                    # print('alt_text------', img.attrs.get('alt', None))
+                    alt_text = img.attrs.get('alt', None)
+                    # print('@@@@@@@@@@@@@@@@@@@@@@@')
+                    # print()
+                    shortcode = shortcode.replace('/','')
+                    shortcode = shortcode.replace('p','')
+                    media_df = media_df.append({
+                                "user_id" : user_id,
+                                "user_name" : user_name, 
+                                "media_url" : media_url,
+                                "shortcode" : shortcode,
+                                "like_count" : like_count,
+                                "comments_count" : comments_count,
+                                "view_count" : view_count,
+                                "alt_text": alt_text
+                                }, ignore_index=True)
+                    # print('worked till here------')
+    except Exception as e:
+        traceback.print_exc()
+        return media_df, False
+    return media_df, True

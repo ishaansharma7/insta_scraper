@@ -45,7 +45,7 @@ def process_reel(driver, user_name, user_id, user_name_status, health_vars):
         else:
             user_name_status.update({user_name: {'status': 'scraped', 'reason': 'successful'}})
     
-    get_full_reel_details(driver, shortcode_set)
+    # get_full_reel_details(driver, shortcode_set)
     reels_data_to_api(media_df)
     return_status_resp({user_name:user_name_status[user_name]})
     media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)

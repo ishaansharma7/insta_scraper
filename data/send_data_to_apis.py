@@ -2,7 +2,7 @@ from pprint import pprint
 import requests
 import json
 import traceback
-from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL
+from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL
 from datetime import datetime
 
 
@@ -157,3 +157,31 @@ def get_user_name_batch(limit=5):
     except Exception:
         traceback.print_exc()
     return None
+
+def posts_data_to_api(media_df):
+    print('sending posts data-----')
+    post_list = []
+    for index, row in media_df.iterrows():
+        c_row = {
+            'user_name': row["user_name"],
+            'media_url': row["media_url"],
+            'shortcode': row["shortcode"],
+            'comments_count': row["comments_count"],
+			'like_count': row["like_count"],
+            'view_count': row["view_count"],
+            'user_id': row["user_id"],
+            'alt_text': row["alt_text"],
+            'last_updated': str(datetime.now().date())
+        }
+        post_list.append(c_row)
+    try:
+        url = POSTS_DATA_URL
+        payload = json.dumps({
+        "posts_data": post_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
