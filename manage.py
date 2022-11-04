@@ -16,7 +16,9 @@ from time import sleep, time
 from datetime import timedelta
 from data.highlights_data import get_high_data
 from utils.read_from_html import get_upload_dates
-
+from utils.mymoney_db import get_new_users
+from utils.fb_apis import get_user_details_from_api, get_details_from_response
+from utils.utils import user_details_from_api_scrapper
 
 @application.cli.command('test_cmd')
 def func_test_cmd():
@@ -98,7 +100,36 @@ def func_comment_sync_kafka():
       print ("Error in readFromKafka {}".format(e))
       traceback.print_exc()
 
+
 @application.cli.command('produce_kafka')
 def produce_kafka():
    send_to_insta_kafka({'name': 'ishaan', 'age': 99}, "2")
    print('worked')
+
+
+@application.cli.command('bulk_new_user_onboarding')
+def new_user_onboarding(new_users=None):
+   new_users = get_new_users()
+   for user in new_users:
+      print({user.get("acc_name", None) : user.get("user_id", "")})
+      response = get_user_details_from_api(user)
+      if response:
+         get_details_from_response(user, response)
+      else:
+         process_batch.start_batch_processing({user.get("acc_name") : user.get("user_id")})
+
+
+@application.cli.command("mymoney_insta_onboarding")
+def func_comment_sync_kafka():
+   try:
+      consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', enable_auto_commit=True, group_id = 'insta_onboarding')
+      consumer.subscribe(current_app.config['KAFKA_INSTA_ONOARDING_EVENT'])
+      while True:
+         for msg in consumer:
+            msg = msg[6]
+            payload = json.loads(msg)
+            payload = payload.get("payload", {})
+            user_details_from_api_scrapper(payload)
+   except Exception as e:
+      traceback.print_exc()
+      print ("Error in readFromKafka {}".format(e))

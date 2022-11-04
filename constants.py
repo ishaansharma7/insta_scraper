@@ -22,3 +22,20 @@ SEND_SCRAPEID_URL = API_BASE_URL + '/v1/instagram/manager/send/scrape-id/'
 REELS_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/reels-data/'
 USER_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/user-data/'
 USER_NAME_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/status/user-name/'
+
+insta_url = os.environ["INSTA_GRAPH_URL"]
+mymoney_insta_id = os.environ["MYMONEY_INSTA_ID"]
+access_token = os.environ["INSTA_ACCESS_TOKEN"]
+
+#instagram DB details
+SQL_HOST = os.environ["SQL_HOST"]
+PSQL_PORT = os.environ["PSQL_PORT"]
+SQL_DATABASE = os.environ["SQL_DATABASE"]
+SQL_USER_NAME = os.environ["SQL_USER_NAME"]
+SQL_PASSWORD = os.environ["SQL_PASSWORD"]
+
+#rewards DB details
+REWARDS_IP = os.environ["REWARDS_IP"]
+REWARDS_PASS = os.environ["REWARDS_PASS"]
+REWARDS_DB = os.environ["REWARDS_DB"]
+REWARDS_USER = os.environ["REWARDS_USER"]
