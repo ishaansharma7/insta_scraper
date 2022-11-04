@@ -13,8 +13,8 @@ def get_web_driver(CHROMEDRIVER, headless=False):
         opt.add_argument('--disable-dev-shm-usage')
         opt.add_argument('--disable-gpu')
         opt.add_argument("--window-size=1024,768")
-    else:
-        driver.maximize_window()
     opt.add_argument("user-data-dir=selenium_session")
     driver = webdriver.Chrome(executable_path=DRIVER_BIN, options=opt)
+    if not headless:
+        driver.maximize_window()
     return driver

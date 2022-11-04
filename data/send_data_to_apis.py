@@ -2,7 +2,10 @@ from pprint import pprint
 import requests
 import json
 import traceback
-from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL
+from constants import (UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL,
+USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL,
+SCROLL_POSTS_URL
+)
 from datetime import datetime
 
 
@@ -194,6 +197,25 @@ def single_reel_data_to_api(reel_dict):
         url = SINGLE_REEL_URL
         payload = json.dumps({
         "reel_data": reel_dict,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+
+def post_data_to_api(scraped_post_list):
+    print('sending posts data to api -----')
+    for row in scraped_post_list:
+        row['comments_count_int'] = number_clean_up(row["comments_count"])
+        row['like_count_int'] = number_clean_up(row["like_count"])
+        row['last_updated'] = str(datetime.now().date())
+        row['permalink'] = 'https://www.instagram.com/p/' + row["shortcode"]
+    try:
+        url = SCROLL_POSTS_URL
+        payload = json.dumps({
+        "posts_data": scraped_post_list,
         })
         headers = {
         'Content-Type': 'application/json',
