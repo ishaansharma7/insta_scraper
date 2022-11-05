@@ -14,4 +14,4 @@ def user_details_from_api_scrapper(user):
                 else:
                     process_batch.start_batch_processing({acc_name : user.get("user_id")})
     except Exception as e:
-        traceback.print_exec()
+        traceback.print_exc()
