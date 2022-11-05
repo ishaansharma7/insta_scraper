@@ -139,7 +139,7 @@ def start_batch_processing(batch=None):
             user_data_to_api(user_df)
             # user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
-            traceback.print_exec()
+            traceback.print_exc()
             pass
 
         if user_pvt:
