@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from main import create_app
+from flask import current_app
 import time
+import traceback
+import json
+from kafka import KafkaConsumer
 from scripts.test_script import hello_world
 from data import process_batch
 from constants import CHROMEDRIVER, CRED_AVAILABLE, USER_NAME, PASSWORD
@@ -53,30 +57,6 @@ def process_reels_func():
    print('total duration-----', timedelta(seconds=end_seconds))
    print('\n \n \n')
    return
-
-
-@application.cli.command("consume_kafka")
-def func_comment_sync_kafka():
-   print("KAFKA CONSUMER CALLED")
-   try:
-      consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='earliest', enable_auto_commit=True, group_id = 'insta_scrapers')
-      consumer.subscribe(current_app.config['KAFKA_USER_UPDATE_EVENT'])
-      while True:
-         for msg in consumer:
-            msg = msg[6]
-            payload = json.loads(msg)
-            #callback_data = payload['payload']
-            print('insta data: ', payload)
-            # process_fb_callback(payload)
-   except Exception as e:
-      print ("Error in readFromKafka {}".format(e))
-      traceback.print_exc()
-
-
-@application.cli.command('produce_kafka')
-def produce_kafka():
-   send_to_insta_kafka({'name': 'ishaan', 'age': 99}, "2")
-   print('worked')
 
 
 @application.cli.command('bulk_new_user_onboarding')
