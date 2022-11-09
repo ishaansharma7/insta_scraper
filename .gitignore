@@ -25,6 +25,7 @@ config/staging.cfg
 env/
 selenium_session
 *.xlsx
+*.png
 log.txt
 *_log.txt
 test_folder

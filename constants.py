@@ -20,8 +20,12 @@ SEND_USERNAME_URL= API_BASE_URL + '/v1/instagram/manager/send/user-names/'
 UPDATE_SCRAPEID_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/status/scrape-id/'
 SEND_SCRAPEID_URL = API_BASE_URL + '/v1/instagram/manager/send/scrape-id/'
 REELS_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/reels-data/'
+POSTS_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/posts-data/'
 USER_DATA_URL = API_BASE_URL + '/v1/instagram/manager/update/user-data/'
 USER_NAME_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/status/user-name/'
+
+SINGLE_REEL_URL = API_BASE_URL + '/v1/instagram/manager/update/single-reel-data/'
+SCROLL_POSTS_URL = API_BASE_URL + '/v1/instagram/manager/update/scroll-posts-data/'
 
 insta_url = os.environ["INSTA_GRAPH_URL"]
 mymoney_insta_id = os.environ["MYMONEY_INSTA_ID"]

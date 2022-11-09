@@ -2,7 +2,10 @@ from pprint import pprint
 import requests
 import json
 import traceback
-from constants import UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL, USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL
+from constants import (UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL,
+USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL,
+SCROLL_POSTS_URL
+)
 from datetime import datetime
 
 
@@ -108,13 +111,13 @@ def number_clean_up(clean_value):
 		if not isinstance(clean_value, int):
 			# import pdb; pdb.set_trace()
 			clean_value = clean_value.replace(",", "")
-			clean_value = clean_value.replace(".", "")
+			# clean_value = clean_value.replace(".", "")
 			if "k" in clean_value.lower():
 				clean_value = clean_value.replace("K", "")
-				clean_value = int(clean_value) * 1000
+				clean_value = float(clean_value) * 1000
 			elif "m" in clean_value.lower():
 				clean_value = clean_value.replace("M", "")
-				clean_value = int(clean_value) * 1000000
+				clean_value = float(clean_value) * 1000000
 	except Exception as e:
 		traceback.print_exc()
 		print(clean_value)
@@ -131,6 +134,7 @@ def return_status_resp(user_name_status: dict, scraping_id_status: dict=None):
             user_name_list.append(v)
 
         if scraping_id_status:
+            print('scraping_id_status send-----')
             update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
         
         if not len(user_name_list): return
@@ -156,3 +160,66 @@ def get_user_name_batch(limit=5):
     except Exception:
         traceback.print_exc()
     return None
+
+def posts_data_to_api(media_df):
+    print('sending posts data-----')
+    post_list = []
+    for index, row in media_df.iterrows():
+        c_row = {
+            'user_name': row["user_name"],
+            'media_url': row["media_url"],
+            'shortcode': row["shortcode"],
+            'comments_count': row["comments_count"],
+			'like_count': row["like_count"],
+            'view_count': row["view_count"],
+            'user_id': row["user_id"],
+            'alt_text': row["alt_text"],
+            'last_updated': str(datetime.now().date())
+        }
+        post_list.append(c_row)
+    try:
+        url = POSTS_DATA_URL
+        payload = json.dumps({
+        "posts_data": post_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+
+
+def single_reel_data_to_api(reel_dict):
+    print('sending single reel data data-----')
+    
+    try:
+        url = SINGLE_REEL_URL
+        payload = json.dumps({
+        "reel_data": reel_dict,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+
+def post_data_to_api(scraped_post_list):
+    print('sending posts data to api -----')
+    for row in scraped_post_list:
+        row['comments_count_int'] = number_clean_up(row["comments_count"])
+        row['like_count_int'] = number_clean_up(row["like_count"])
+        row['last_updated'] = str(datetime.now().date())
+        row['permalink'] = 'https://www.instagram.com/p/' + row["shortcode"]
+    try:
+        url = SCROLL_POSTS_URL
+        payload = json.dumps({
+        "posts_data": scraped_post_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()

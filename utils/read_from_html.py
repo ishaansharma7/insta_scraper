@@ -7,7 +7,8 @@ import pandas as pd
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.webdriver.common.action_chains import ActionChains
+from data.send_data_to_apis import single_reel_data_to_api, post_data_to_api
 from data.highlights_data import get_high_data
 
 
@@ -84,9 +85,10 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
     try:
         user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
         post_count = user_stats[0].text
+        post_count_int = int(post_count.replace(',', ''))
         followers_count = user_stats[1].text
         following_count = user_stats[2].text
-        if not user_pvt:
+        if not user_pvt or not post_count_int:
             highlight_list = get_high_data(driver)
 
         desc = WebDriverWait(driver,5).until(EC.presence_of_element_located((By.CLASS_NAME, '_aa_c')))
@@ -133,44 +135,37 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
                                 "account_exists_status" : account_exists_status,
                                 "highlights": highlight_list
                             }, ignore_index=True)
-        return user_df
+        return user_df, post_count_int
 
 
 
-def get_upload_dates(driver):
-    count = 0
-    shortcode_set = []
-    wait_time = random.randrange(2, 6)
-    SCROLL_PAUSE_TIME = wait_time
-    while count <= 5:
-        local_set = get_shortcodes(driver)
-        shortcode_set.extend(local_set)
-        last_height = driver.execute_script("return document.body.scrollHeight")
+def get_full_reel_details(driver, shortcode_set):
+    try:
+        # pprint(shortcode_set)
+        shortcode_len = len(shortcode_set)
+        if not shortcode_len:
+            return
 
-        # Scroll down to bottom
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        latest_post = shortcode_set[0]
+        get_single_reel_detail(driver, latest_post)
+        if shortcode_len < 3:
+            oldest_post  = shortcode_set[-1]
+            get_single_reel_detail(driver, oldest_post)
+        else:
+            mid = int(shortcode_len/2)
+            mid_post = shortcode_set[mid]
+            get_single_reel_detail(driver, mid_post)
+            oldest_post  = shortcode_set[-1]
+            get_single_reel_detail(driver, oldest_post)
 
-        # Wait to load page
-        sleep(SCROLL_PAUSE_TIME)
-
-        # Calculate new scroll height and compare with last scroll height
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
-        count += 1
-    if not shortcode_set:
-        print('no shortcode found-----')
-        return
-    mid = int(len(shortcode_set)/2)
-    mid_post = shortcode_set[mid]
-    latest_post = shortcode_set[0]
-    oldest_post  = shortcode_set[-1]
-    # add the code for scraping data here
-    # here the api for sending data
+        # add the code for scraping data here
+        # here the api for sending data
+    except Exception:
+        traceback.print_exc()
+        print('single reel failure-----')
 
 
-def get_shortcodes(driver):
+def get_shortcodes_reels(driver):
     insta_url = 'https://www.instagram.com'
     shortcode_set = []
     try:
@@ -181,7 +176,7 @@ def get_shortcodes(driver):
             post_div = post_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
             for div in post_div:
                 shortcode = div['href']
-                if "/p/" in shortcode:
+                if "/reel/" in shortcode:
                     # print('shortcode-----', shortcode)
                     shortcode_set.append(insta_url+shortcode)
                     # print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
@@ -189,8 +184,166 @@ def get_shortcodes(driver):
         traceback.print_exc()
     return shortcode_set
 
-def get_single_date(driver):
-    driver.get('https://www.instagram.com/p/CkWUj0hLhnz/')
+def get_single_reel_detail(driver, post_url):
+    driver.get(post_url)
+    data_dict = {'shortcode': None, 'caption': None, 'hashtags':[]}
+    shortcode = post_url.split('/reel/')[1].replace('/', '')
+    # print(shortcode)
+    data_dict['shortcode'] = shortcode
     time_ht = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'time')))
-    print('time_ht----', time_ht.get_attribute('datetime'))
+    # print('time_ht----', time_ht.get_attribute('datetime'))
+    time_str = str(time_ht.get_attribute('datetime'))
+    data_dict['media_date'] = time_str
+
+    try:
+        # caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mount_0_0_Ab"]/div/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/div[1]/div[1]/article/div/div[2]/div/div[2]/div[1]/ul/div')))
+        caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
+        caption = caption_ele.find_element(By.TAG_NAME, "span")
+        caption1 = str(caption.text)
+        # print(caption1)
+
+        ul_section = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+        ul_section = WebDriverWait(ul_section, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+        caption = ul_section.find_element(By.CLASS_NAME, "_a9zs")
+        caption = caption.find_element(By.TAG_NAME, "span")
+        caption2 = str(caption.text)
+        # print('new detected----', caption2)
+        if caption1 == caption2:
+            data_dict['caption'] = None
+        else:
+            data_dict['caption'] = caption1
+    except Exception:
+        print('no caption-----')
+
+    # print('full captions----', caption_text)
+    try:
+        hashtags = caption_ele.find_elements(By.TAG_NAME, "a")
+        for tag in hashtags:
+            data_dict['hashtags'].append(str(tag.text))
+    except Exception:
+        print('no hahtags')
+
+    single_reel_data_to_api(data_dict)
+    # click_on_reels_tagged_users(driver)
+    # print('***************')
+
+def click_on_reels_tagged_users(driver):
+    article = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+    video_div = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'x1ey2m1c x9f619 xds687c x10l6tqk x17qophe x13vifvy x1ypdohk')))
     
+    # button.click()
+    # users_div = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_abm4')))
+    # for user_div in users_div:
+    #     print('tagged users----', user_div.text)
+    print('done')
+
+def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
+    # driver.get('https://www.instagram.com/cristiano/')
+    sleep(5)
+    post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+    all_post = WebDriverWait(post_grid, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+    scraped_post_list = []
+    for single_post in all_post:
+        try:
+            if str(single_post.get_attribute("href")) in covered_shortcodes:
+                continue
+            # print(ct_dict['ct'])
+            ct_dict['ct'] += 1
+            covered_shortcodes[str(single_post.get_attribute("href"))] = 1
+            single_post.get_attribute("href")
+            hover = ActionChains(driver).move_to_element(single_post)
+            hover.perform()
+            single_post_html = single_post.get_attribute('innerHTML')
+            # print(single_post.get_attribute('innerHTML'))
+            # return
+            beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
+            shortcode = str(single_post.get_attribute("href")).split('/p/')[1].replace('/','')
+            # print('shortcode-----', shortcode)
+            data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+            like_comment_div_count = 0
+            like_comment_storage = []
+            for data in data_div:
+                # print(data.text)
+                like_comment_storage.append(str(data.text))
+                like_comment_div_count += 1
+            like_count = comment_count = 0
+            if like_comment_div_count > 1:
+                like_count = like_comment_storage[0]
+                comment_count = like_comment_storage[-1]
+            else:
+                comment_count = like_comment_storage[0]
+            # print(f'like: {like_count},  comment: {comment_count}')
+
+            img_ele = beautifulSoupText.find('img')
+            alt_text = ''
+            if 'alt' in img_ele.attrs:
+                alt_text = img_ele.attrs['alt']
+            # print('alt_text-----', alt_text)
+
+            scraped_post_list.append({
+                'shortcode': shortcode,
+                'like_count': like_count,
+                'comments_count': comment_count,
+                'alt_text': alt_text,
+                'user_name': user_name,
+                'user_id': user_id
+            })
+            sleep(.3)
+        except Exception:
+            traceback.print_exc()
+            print('exception in per hover-----')
+    # data to api func
+    return scraped_post_list
+    post_data_to_api(scraped_post_list)
+
+def per_hover2(driver):
+    driver.get('https://www.instagram.com/cristiano/')
+    post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+    single_post = WebDriverWait(post_grid, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'a')))
+    hover = ActionChains(driver).move_to_element(single_post)
+    hover.perform()
+    single_post_html = single_post.get_attribute('innerHTML')
+    # print(single_post.get_attribute('innerHTML'))
+    beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
+    data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+    for data in data_div:
+        print(data.text)
+    
+
+
+def get_post_details(contents, user_name, user_id, covered_shortcodes, media_df):
+    try:
+        beautifulSoupText = BeautifulSoup(contents, 'html.parser')
+        reel_div = beautifulSoupText.find('main')
+        if reel_div:
+            # reel_div = reel_div.find_all("a", attrs={"class":"qi72231t nu7423ey n3hqoq4p r86q59rh b3qcqh3k fq87ekyn bdao358l fsf7x5fv rse6dlih s5oniofx m8h3af8h l7ghb35v kjdc1dyq kmwttqpk srn514ro oxkhqvkx rl78xhln nch0832m cr00lzj9 rn8ck1ys s3jn8y49 icdlwmnq _a6hd", "role":"link"})
+            reel_div = reel_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
+            comments_count = like_count = view_count = None
+            media_url = shortcode = None
+            for div in reel_div:
+                shortcode = div['href']
+                if "/p/" in shortcode and shortcode not in covered_shortcodes:
+                    # print('post shortcode-----', 'https://www.instagram.com'+shortcode)
+                    covered_shortcodes[shortcode] = 1
+                    img = div.find('img')
+                    # print('alt_text------', img.attrs.get('alt', None))
+                    alt_text = img.attrs.get('alt', None)
+                    # print('@@@@@@@@@@@@@@@@@@@@@@@')
+                    # print()
+                    shortcode = shortcode.replace('/','')
+                    shortcode = shortcode.replace('p','')
+                    media_df = media_df.append({
+                                "user_id" : user_id,
+                                "user_name" : user_name, 
+                                "media_url" : media_url,
+                                "shortcode" : shortcode,
+                                "like_count" : like_count,
+                                "comments_count" : comments_count,
+                                "view_count" : view_count,
+                                "alt_text": alt_text
+                                }, ignore_index=True)
+                    # print('worked till here------')
+    except Exception as e:
+        traceback.print_exc()
+        return media_df, False
+    return media_df, True

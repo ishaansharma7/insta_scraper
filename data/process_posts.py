@@ -6,7 +6,7 @@ from flask import current_app
 import pandas as pd
 import random
 from utils.exist_check import check_handle_valid, user_handle_pvt
-from utils.read_from_html import get_reel_details, get_user_details, get_shortcodes, get_upload_dates
+from utils.read_from_html import get_reel_details, get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
 import requests
 import json
@@ -150,7 +150,6 @@ def process_posts(batch=None):
             print('skipping further process------')
             continue
 
-        get_upload_dates(driver)
         
         
         # here add the db code

@@ -9,6 +9,7 @@ from data.send_data_to_apis import request_scraping_creds, return_status_resp, u
 from utils.selenium_driver import get_web_driver
 from utils.exist_check import check_if_logged_in
 from data.scrape_reels import process_reel
+from data.scrape_posts import process_posts
 
 
 def health_check(health_vars):
@@ -62,7 +63,7 @@ def start_batch_processing(batch=None):
         print('login failed, exiting------')
         return
         
-    print('scraping id in use-----', scraping_id)
+    if not REUSE_SESSION:   print('scraping id in use-----', scraping_id)
     ###################### get batch ######################
     if not batch:
         batch = get_user_name_batch(BATCH_SIZE)
@@ -114,12 +115,12 @@ def start_batch_processing(batch=None):
         
         print(user_name, user_id)
 
-        wait_time = random.randrange(3, 7)
+        wait_time = random.randrange(2, 5)
         sleep(wait_time)
 
         driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
 
-        wait_time = random.randrange(3, 5)
+        wait_time = random.randrange(2, 5)
         sleep(wait_time)
         
         ###################### checking account ######################
@@ -133,9 +134,10 @@ def start_batch_processing(batch=None):
         else:
             health_vars['consecutive_fail_ct'] = 0
 
+        ###################### scrape user info ######################
         user_pvt = user_handle_pvt(driver)
         try:
-            user_df = get_user_details(driver, user_name, user_id, user_pvt)
+            user_df, post_count = get_user_details(driver, user_name, user_id, user_pvt)
             user_data_to_api(user_df)
             # user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
@@ -148,8 +150,14 @@ def start_batch_processing(batch=None):
             print('skipping further process------')
             continue
 
+        if post_count == 0:
+            print('no post-----')
+            continue
+        
         ###################### processing reels ######################
         process_reel(driver, user_name, user_id, user_name_status, health_vars)
+        ###################### processing posts ######################
+        process_posts(driver, user_name, user_id, user_name_status, health_vars)
         
     scraping_id_status['status'] = 'free'
     return_status_resp(user_name_status, scraping_id_status)
