@@ -8,8 +8,6 @@ from utils.selenium_driver import get_web_driver
 from time import sleep, time
 from datetime import timedelta
 from utils.read_from_html import per_hover
-from data.highlights_data import get_high_data
-from utils.read_from_html import get_upload_dates
 from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
