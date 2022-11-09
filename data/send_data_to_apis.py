@@ -111,13 +111,13 @@ def number_clean_up(clean_value):
 		if not isinstance(clean_value, int):
 			# import pdb; pdb.set_trace()
 			clean_value = clean_value.replace(",", "")
-			clean_value = clean_value.replace(".", "")
+			# clean_value = clean_value.replace(".", "")
 			if "k" in clean_value.lower():
 				clean_value = clean_value.replace("K", "")
-				clean_value = int(clean_value) * 1000
+				clean_value = float(clean_value) * 1000
 			elif "m" in clean_value.lower():
 				clean_value = clean_value.replace("M", "")
-				clean_value = int(clean_value) * 1000000
+				clean_value = float(clean_value) * 1000000
 	except Exception as e:
 		traceback.print_exc()
 		print(clean_value)

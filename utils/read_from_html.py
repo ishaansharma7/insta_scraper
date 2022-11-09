@@ -239,54 +239,59 @@ def click_on_reels_tagged_users(driver):
 
 def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
     # driver.get('https://www.instagram.com/cristiano/')
+    sleep(5)
     post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
     all_post = WebDriverWait(post_grid, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
     scraped_post_list = []
     for single_post in all_post:
-        if str(single_post.get_attribute("href")) in covered_shortcodes:
-            continue
-        # print(ct_dict['ct'])
-        ct_dict['ct'] += 1
-        covered_shortcodes[str(single_post.get_attribute("href"))] = 1
-        single_post.get_attribute("href")
-        hover = ActionChains(driver).move_to_element(single_post)
-        hover.perform()
-        single_post_html = single_post.get_attribute('innerHTML')
-        # print(single_post.get_attribute('innerHTML'))
-        # return
-        beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
-        shortcode = str(single_post.get_attribute("href")).split('/p/')[1].replace('/','')
-        # print('shortcode-----', shortcode)
-        data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
-        like_comment_div_count = 0
-        like_comment_storage = []
-        for data in data_div:
-            # print(data.text)
-            like_comment_storage.append(str(data.text))
-            like_comment_div_count += 1
-        like_count = comment_count = 0
-        if like_comment_div_count > 1:
-            like_count = like_comment_storage[0]
-            comment_count = like_comment_storage[-1]
-        else:
-            comment_count = like_comment_storage[0]
-        # print(f'like: {like_count},  comment: {comment_count}')
+        try:
+            if str(single_post.get_attribute("href")) in covered_shortcodes:
+                continue
+            # print(ct_dict['ct'])
+            ct_dict['ct'] += 1
+            covered_shortcodes[str(single_post.get_attribute("href"))] = 1
+            single_post.get_attribute("href")
+            hover = ActionChains(driver).move_to_element(single_post)
+            hover.perform()
+            single_post_html = single_post.get_attribute('innerHTML')
+            # print(single_post.get_attribute('innerHTML'))
+            # return
+            beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
+            shortcode = str(single_post.get_attribute("href")).split('/p/')[1].replace('/','')
+            # print('shortcode-----', shortcode)
+            data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+            like_comment_div_count = 0
+            like_comment_storage = []
+            for data in data_div:
+                # print(data.text)
+                like_comment_storage.append(str(data.text))
+                like_comment_div_count += 1
+            like_count = comment_count = 0
+            if like_comment_div_count > 1:
+                like_count = like_comment_storage[0]
+                comment_count = like_comment_storage[-1]
+            else:
+                comment_count = like_comment_storage[0]
+            # print(f'like: {like_count},  comment: {comment_count}')
 
-        img_ele = beautifulSoupText.find('img')
-        alt_text = ''
-        if 'alt' in img_ele.attrs:
-            alt_text = img_ele.attrs['alt']
-        # print('alt_text-----', alt_text)
+            img_ele = beautifulSoupText.find('img')
+            alt_text = ''
+            if 'alt' in img_ele.attrs:
+                alt_text = img_ele.attrs['alt']
+            # print('alt_text-----', alt_text)
 
-        scraped_post_list.append({
-            'shortcode': shortcode,
-            'like_count': like_count,
-            'comments_count': comment_count,
-            'alt_text': alt_text,
-            'user_name': user_name,
-            'user_id': user_id
-        })
-        sleep(.3)
+            scraped_post_list.append({
+                'shortcode': shortcode,
+                'like_count': like_count,
+                'comments_count': comment_count,
+                'alt_text': alt_text,
+                'user_name': user_name,
+                'user_id': user_id
+            })
+            sleep(.3)
+        except Exception:
+            traceback.print_exc()
+            print('exception in per hover-----')
     # data to api func
     return scraped_post_list
     post_data_to_api(scraped_post_list)

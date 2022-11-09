@@ -62,7 +62,7 @@ def start_batch_processing(batch=None):
         print('login failed, exiting------')
         return
         
-    print('scraping id in use-----', scraping_id)
+    if not REUSE_SESSION:   print('scraping id in use-----', scraping_id)
     ###################### get batch ######################
     if not batch:
         batch = get_user_name_batch(BATCH_SIZE)

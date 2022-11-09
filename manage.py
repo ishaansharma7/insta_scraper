@@ -35,7 +35,7 @@ def user_details():
 def process_reels_func():
    batch = None
    batch = {
-      'cristiano':'',
+      'bhuvan.bam22':'',
    }
    print('start time-----',datetime.now())
    start_epoch = time()
