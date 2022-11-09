@@ -1,6 +1,7 @@
 from time import sleep
 from data.one_time_insta_login import do_insta_login
 import random
+import traceback
 from utils.exist_check import check_handle_valid, user_handle_pvt
 from utils.read_from_html import get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
@@ -138,9 +139,9 @@ def start_batch_processing(batch=None):
         try:
             user_df, post_count = get_user_details(driver, user_name, user_id, user_pvt)
             user_data_to_api(user_df)
-            user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
+            # user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             pass
 
         if user_pvt:

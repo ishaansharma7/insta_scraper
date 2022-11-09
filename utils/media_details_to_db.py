@@ -11,7 +11,6 @@ def insert_media_details_in_db(file_name):
 						(username, media_url, shortcode, comments_count, like_count, view_count, mm_user_id, updated_date)
 						VALUES(%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (shortcode, updated_date) DO NOTHING"""
 			values = (row["user_name"], row["media_url"], row["shortcode"], row["comments_count"], row["like_count"], row["view_count"], row["user_id"], datetime.now().date())
-			cursor = get_insta_db_connection().cursor()
 			cursor.execute(query, values)
 			# print(cursor.rowcount, " media inserted.")
 			cursor.close()

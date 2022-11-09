@@ -12,3 +12,8 @@
 ## Run Command
 * export FLASK_APP=manage.py
 * flask test_cmd
+
+
+##Install to create log file from terminal log
+* brew install except
+* unbuffer flask process_reels |& tee -a log.txt

@@ -49,6 +49,6 @@ def process_reel(driver, user_name, user_id, user_name_status, health_vars):
     reels_data_to_api(media_df)
     get_full_reel_details(driver, shortcode_set)
     return_status_resp({user_name:user_name_status[user_name]})
-    media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
+    # media_df.to_excel(user_name + "_media.xlsx", encoding='utf-8', index=False)
     wait_time = random.randrange(3, 7)
     sleep(wait_time)
