@@ -12,9 +12,6 @@ from constants import CHROMEDRIVER, HEADLESS
 import random
 
 
-
-
-
 def check_exists_by_xpath(driver, xpath):
     try:
         driver.find_element_by_xpath(xpath)
