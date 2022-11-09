@@ -271,10 +271,18 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
         else:
             comment_count = like_comment_storage[0]
         # print(f'like: {like_count},  comment: {comment_count}')
+
+        img_ele = beautifulSoupText.find('img')
+        alt_text = ''
+        if 'alt' in img_ele.attrs:
+            alt_text = img_ele.attrs['alt']
+        # print('alt_text-----', alt_text)
+
         scraped_post_list.append({
             'shortcode': shortcode,
             'like_count': like_count,
             'comments_count': comment_count,
+            'alt_text': alt_text,
             'user_name': user_name,
             'user_id': user_id
         })

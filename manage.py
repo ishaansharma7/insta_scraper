@@ -26,7 +26,7 @@ def user_details():
    # _, driver = do_insta_login(scraping_id, password)
    # get_single_date(driver, 'https://www.instagram.com/reel/Cj-GcxTgBTn/')
    # get_single_reel_detail(driver, 'https://www.instagram.com/reel/Cj94QgpjM8z/')
-   per_hover(driver, {})
+   per_hover(driver,{}, {'ct':0}, '', '')
    sleep(5)
    return
 
@@ -35,7 +35,7 @@ def user_details():
 def process_reels_func():
    batch = None
    batch = {
-      'round2hell':'',
+      'cristiano':'',
    }
    print('start time-----',datetime.now())
    start_epoch = time()
