@@ -292,9 +292,9 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
         except Exception:
             traceback.print_exc()
             print('exception in per hover-----')
-    # data to api func
+            driver.refresh()
+            sleep(5)
     return scraped_post_list
-    post_data_to_api(scraped_post_list)
 
 def per_hover2(driver):
     driver.get('https://www.instagram.com/cristiano/')
