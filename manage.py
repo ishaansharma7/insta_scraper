@@ -78,10 +78,13 @@ def func_comment_sync_kafka():
       consumer.subscribe(current_app.config['KAFKA_INSTA_ONOARDING_EVENT'])
       while True:
          for msg in consumer:
+            print("offset", msg.offset)
             msg = msg[6]
             payload = json.loads(msg)
             payload = payload.get("payload", {})
+            print(payload.get("acc_name"))
             user_details_from_api_scrapper(payload)
+            consumer.commit()
    except Exception as e:
       traceback.print_exc()
       print ("Error in readFromKafka {}".format(e))
