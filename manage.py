@@ -32,10 +32,11 @@ def user_details():
    else:
       print('no creds for login-----')
       return
-   driver = get_web_driver(CHROMEDRIVER, False)
+   driver = get_web_driver(CHROMEDRIVER, True)
    # _, driver = do_insta_login(scraping_id, password)
    # get_single_date(driver, 'https://www.instagram.com/reel/Cj-GcxTgBTn/')
    # get_single_reel_detail(driver, 'https://www.instagram.com/reel/Cj94QgpjM8z/')
+   driver.get('https://www.instagram.com/flying_kudi/')
    per_hover(driver,{}, {'ct':0}, '', '')
    sleep(5)
    return
@@ -45,7 +46,7 @@ def user_details():
 def process_reels_func():
    batch = None
    batch = {
-      'bhuvan.bam22':'',
+
    }
    print('start time-----',datetime.now())
    start_epoch = time()

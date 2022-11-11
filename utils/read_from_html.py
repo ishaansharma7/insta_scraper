@@ -238,11 +238,16 @@ def click_on_reels_tagged_users(driver):
     print('done')
 
 def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
-    # driver.get('https://www.instagram.com/cristiano/')
-    sleep(5)
-    post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
-    all_post = WebDriverWait(post_grid, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+    sleep(10)
+    try:
+        post_grid = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
+        all_post = WebDriverWait(post_grid, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+    except Exception:
+        traceback.print_exc()
+        print('unable to locate posts-----')
+        return []
     scraped_post_list = []
+    hover_success = True
     for single_post in all_post:
         try:
             if str(single_post.get_attribute("href")) in covered_shortcodes:
@@ -270,7 +275,7 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
             if like_comment_div_count > 1:
                 like_count = like_comment_storage[0]
                 comment_count = like_comment_storage[-1]
-            else:
+            elif like_comment_div_count == 1:
                 comment_count = like_comment_storage[0]
             # print(f'like: {like_count},  comment: {comment_count}')
 
@@ -288,13 +293,17 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
                 'user_name': user_name,
                 'user_id': user_id
             })
+            hover_success = True
             sleep(.3)
         except Exception:
-            traceback.print_exc()
+            # traceback.print_exc()
             print('exception in per hover-----')
-    # data to api func
+            hover_success = False
+            # driver.refresh()
+            # sleep(5)
+            # continue
+    if hover_success:   print('hover success -----')
     return scraped_post_list
-    post_data_to_api(scraped_post_list)
 
 def per_hover2(driver):
     driver.get('https://www.instagram.com/cristiano/')
