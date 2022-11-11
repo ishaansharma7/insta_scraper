@@ -14,7 +14,7 @@ def process_posts(driver, user_name, user_id, user_name_status, health_vars):
     SCROLL_PAUSE_TIME = wait_time
     count = 0
     covered_shortcodes = {}
-    ct_dict = {'ct':1}
+    ct_dict = {'ct':0}
     scraped_post_list = []
     while count <= 2:
         # media_df, sele_worked = get_post_details(driver.page_source, user_name, user_id, covered_shortcodes, media_df)
@@ -34,6 +34,7 @@ def process_posts(driver, user_name, user_id, user_name_status, health_vars):
             break
         last_height = new_height
         count += 1
+    print('no. of scrapped post-----', ct_dict['ct'])
     post_data_to_api(scraped_post_list)
     # if len(media_df) == 0 and not sele_worked:
     #     print('no details scraped------')

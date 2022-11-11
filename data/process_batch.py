@@ -39,21 +39,25 @@ def health_check_process(health_vars):
 def start_batch_processing(batch=None):
 
     ###################### login id and password ######################
-    if CRED_AVAILABLE:
-        scraping_id, password = USER_NAME, PASSWORD
-    else:
-        scraping_id, password = request_scraping_creds()
-    if not scraping_id or not password:
-        print('problem in fetching scrape id creds, exiting-----')
-        return
+    # if CRED_AVAILABLE:
+    #     scraping_id, password = USER_NAME, PASSWORD
+    # else:
+    #     scraping_id, password = request_scraping_creds()
+    # if not scraping_id or not password:
+    #     print('problem in fetching scrape id creds, exiting-----')
+    #     return
     
     ###################### session usage ######################
+    scraping_id, password = USER_NAME, PASSWORD
     if REUSE_SESSION:
         driver = get_web_driver(CHROMEDRIVER, HEADLESS)
         login_success = check_if_logged_in(driver)
     else:
         login_success, driver = do_insta_login(scraping_id, password)
 
+    if not login_success:
+        login_success, driver = do_insta_login(scraping_id, password)
+    
     if not login_success:
         print('login failed, retrying------')
         scraping_id, password = request_scraping_creds()
