@@ -83,7 +83,7 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
     user_id = insta_user_name = profile_url = post_count = followers_count = following_count = bio = private_account_status = account_exists_status = None
     highlight_list = []
     try:
-        user_stats =  WebDriverWait(driver,8).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
+        user_stats =  WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, '_ac2a')))
         post_count = user_stats[0].text
         post_count_int = int(post_count.replace(',', ''))
         followers_count = user_stats[1].text

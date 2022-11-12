@@ -86,6 +86,7 @@ def start_batch_processing(batch=None):
     ###################### batch processing starts ######################
     curr_num = 1
     for user_name, user_id in batch.items():
+        user_name = user_name.lower()
         print('**********************************************')
         print(f'currently on number {curr_num} -----')
         curr_num += 1
