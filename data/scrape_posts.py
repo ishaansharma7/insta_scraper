@@ -2,7 +2,7 @@ import pandas as pd
 from time import sleep
 import random
 from utils.read_from_html import get_post_details, get_shortcodes_reels, get_full_reel_details, per_hover
-from data.send_data_to_apis import reels_data_to_api, return_status_resp, post_data_to_api
+from data.send_data_to_apis import reels_data_to_api, post_data_to_api
 
 def process_posts(driver, user_name, user_id, user_name_status, health_vars):
     print('scraping post data-----')

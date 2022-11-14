@@ -72,6 +72,8 @@ def automated_login(driver, username, password):
 
 
 def do_insta_login(USER_NAME, PASSWORD):
+    if not USER_NAME or not PASSWORD:
+        return False, None
     try:
         session_path = os.path.join(os.getcwd(), 'selenium_session')
         if os.path.exists(session_path):

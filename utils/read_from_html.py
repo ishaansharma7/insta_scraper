@@ -17,7 +17,6 @@ def get_reel_details(contents, user_name, user_id, media_df):
         beautifulSoupText = BeautifulSoup(contents, 'html.parser')
         reel_div = beautifulSoupText.find('main')
         if reel_div:
-            # reel_div = reel_div.find_all("a", attrs={"class":"qi72231t nu7423ey n3hqoq4p r86q59rh b3qcqh3k fq87ekyn bdao358l fsf7x5fv rse6dlih s5oniofx m8h3af8h l7ghb35v kjdc1dyq kmwttqpk srn514ro oxkhqvkx rl78xhln nch0832m cr00lzj9 rn8ck1ys s3jn8y49 icdlwmnq _a6hd", "role":"link"})
             reel_div = reel_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
             comments_count = like_count = view_count = 0
             media_url = shortcode = None
@@ -48,20 +47,9 @@ def get_reel_details(contents, user_name, user_id, media_df):
                             comments_count = stat_dict["comments_count"]
                             view_count = stat_dict["view_count"]
 
-                            # comments_count = span_list[2].string
-                            # view_count = span_list[4].string
-                        # val_list = [0 for i in range(3)]
-                        # idx = 0
-                        # for span in span_list:
-                        #     if span.string != '' and idx <= 2:
-                        #         val_list[idx] = span.string
-                        #         idx += 1
-                        # print('val_list----', val_list)
-                        # like_count, comments_count, view_count = val_list
-
                     except Exception:
                         traceback.print_exc()
-                        print('failed to get like,comment and views count-------')
+                        print('failed to get like,comment and views count, POS:rfh-1 -------')
                     media_df = media_df.append({
                                 "user_id" : user_id,
                                 "user_name" : user_name, 
@@ -71,9 +59,9 @@ def get_reel_details(contents, user_name, user_id, media_df):
                                 "comments_count" : comments_count,
                                 "view_count" : view_count
                                 }, ignore_index=True)
-                    # print('worked till here------')
     except Exception as e:
         traceback.print_exc()
+        print('failure in scraping reels basic info, POS:rfh-2 -------')
         return media_df, False
     return media_df, True
 
@@ -200,19 +188,24 @@ def get_single_reel_detail(driver, post_url):
         caption_ele = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, '_a9zs')))
         caption = caption_ele.find_element(By.TAG_NAME, "span")
         caption1 = str(caption.text)
-        # print(caption1)
+        # print('caption detected----',caption1)
 
-        ul_section = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
-        ul_section = WebDriverWait(ul_section, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
-        caption = ul_section.find_element(By.CLASS_NAME, "_a9zs")
-        caption = caption.find_element(By.TAG_NAME, "span")
-        caption2 = str(caption.text)
-        # print('new detected----', caption2)
+        caption2 = ''
+        try:
+            ul_section = WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+            ul_section = WebDriverWait(ul_section, 2).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+            caption = ul_section.find_element(By.CLASS_NAME, "_a9zs")
+            caption = caption.find_element(By.TAG_NAME, "span")
+            caption2 = str(caption.text)
+            # print('new detected----', caption2)
+        except Exception:
+            pass
         if caption1 == caption2:
             data_dict['caption'] = None
         else:
             data_dict['caption'] = caption1
     except Exception:
+        traceback.print_exc()
         print('no caption-----')
 
     # print('full captions----', caption_text)
@@ -222,10 +215,9 @@ def get_single_reel_detail(driver, post_url):
             data_dict['hashtags'].append(str(tag.text))
     except Exception:
         print('no hahtags')
-
+    print(post_url, 'reel scraped -----')
     single_reel_data_to_api(data_dict)
-    # click_on_reels_tagged_users(driver)
-    # print('***************')
+
 
 def click_on_reels_tagged_users(driver):
     article = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
