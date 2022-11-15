@@ -35,7 +35,7 @@ def check_handle_valid(driver):
 
 def check_if_logged_in(driver):
     driver.get('https://www.instagram.com/')
-    sleep(5)
+    sleep(10)
     # logged_in = False
     # try:
     #     username_field =  WebDriverWait(driver,5).until(EC.presence_of_all_elements_located((By.NAME, 'username')))
