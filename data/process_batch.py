@@ -23,7 +23,7 @@ def retry_login(driver):
     driver.close()
     print('maybe id banned, retrying login ------')
     try:
-        update_scrape_id_status(scraping_id, 'banned')
+        # update_scrape_id_status(scraping_id, 'banned')
         scraping_id, password = request_scraping_creds()
         login_success, driver = do_insta_login(scraping_id, password)
 
@@ -54,11 +54,11 @@ def start_batch_processing(batch=None):
         login_success, driver = do_insta_login(scraping_id, password)
 
     if not login_success:
-        driver.close()
+        if driver: driver.close()
         login_success, driver = do_insta_login(scraping_id, password)
     
     if not login_success:
-        driver.close()
+        if driver: driver.close()
         print('login failed, retrying------')
         scraping_id, password = request_scraping_creds()
         login_success, driver = do_insta_login(scraping_id, password)
