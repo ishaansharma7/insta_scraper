@@ -23,7 +23,7 @@ def check_exists_by_xpath(driver, xpath):
 def automated_login(driver, username, password):
     print('started')
 
-    sleep(random.randrange(2, 7))
+    sleep(random.randrange(8, 12))
 
     username_field = driver.find_element_by_name("username")
     password_filed = driver.find_element_by_name("password")
