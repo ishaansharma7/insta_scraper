@@ -54,9 +54,11 @@ def start_batch_processing(batch=None):
         login_success, driver = do_insta_login(scraping_id, password)
 
     if not login_success:
+        driver.close()
         login_success, driver = do_insta_login(scraping_id, password)
     
     if not login_success:
+        driver.close()
         print('login failed, retrying------')
         scraping_id, password = request_scraping_creds()
         login_success, driver = do_insta_login(scraping_id, password)
@@ -106,6 +108,7 @@ def start_batch_processing(batch=None):
 
             ###################### health check process ######################
             if not login_maintained_check(driver) and not health_good(health_vars):
+
                 driver = retry_login(driver)
                 if not driver:  return
             

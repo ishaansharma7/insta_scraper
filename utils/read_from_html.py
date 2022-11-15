@@ -10,9 +10,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from data.send_data_to_apis import single_reel_data_to_api, post_data_to_api
 from data.highlights_data import get_high_data
+from utils.populate_dates import populate_reel_dates
 
 
-def get_reel_details(contents, user_name, user_id, media_df):
+def get_reel_details(contents, user_name, user_id, media_df, reel_short_code):
     try:
         beautifulSoupText = BeautifulSoup(contents, 'html.parser')
         reel_div = beautifulSoupText.find('main')
@@ -22,7 +23,8 @@ def get_reel_details(contents, user_name, user_id, media_df):
             media_url = shortcode = None
             for div in reel_div:
                 shortcode = div['href']
-                if "reel" in shortcode:
+                if "reel" in shortcode and shortcode not in reel_short_code:
+                    reel_short_code[shortcode] = 1
                     shortcode = shortcode.replace("reel","").replace("/","")
                     div_list = div.find_all("div", attrs={"class":"_aag6 _aajx"})
                     for item in div_list:
@@ -129,31 +131,35 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
 
 def get_full_reel_details(driver, shortcode_set):
     try:
-        # pprint(shortcode_set)
+        insta_url = 'https://www.instagram.com'
         shortcode_len = len(shortcode_set)
+        shortcode_and_date = {}
         if not shortcode_len:
             return
-
         latest_post = shortcode_set[0]
-        get_single_reel_detail(driver, latest_post)
+        shortcode_and_date[latest_post] = get_single_reel_detail(driver, insta_url+ '/reel/' +latest_post)
         if shortcode_len < 3:
             oldest_post  = shortcode_set[-1]
-            get_single_reel_detail(driver, oldest_post)
+            get_single_reel_detail(driver, insta_url+ '/reel/' + oldest_post)
         else:
             mid = int(shortcode_len/2)
             mid_post = shortcode_set[mid]
-            get_single_reel_detail(driver, mid_post)
-            oldest_post  = shortcode_set[-1]
-            get_single_reel_detail(driver, oldest_post)
-
-        # add the code for scraping data here
+            shortcode_and_date[mid_post] = get_single_reel_detail(driver, insta_url+ '/reel/' + mid_post)
+            oldest_post = shortcode_set[-1]
+            shortcode_and_date[oldest_post] = get_single_reel_detail(driver, insta_url+ '/reel/' + oldest_post)
+            # add the code for populating date here
+            # pprint(shortcode_and_date)
+            if shortcode_and_date[mid_post] and shortcode_and_date[oldest_post] and shortcode_and_date[latest_post]:
+                populate_reel_dates(mid, shortcode_set, shortcode_and_date)
+            else:
+                print('failure in getting reels upload date -----')
         # here the api for sending data
     except Exception:
         traceback.print_exc()
         print('single reel failure-----')
 
 
-def get_shortcodes_reels(driver):
+def get_shortcodes_reels(driver, reel_short_code2):
     insta_url = 'https://www.instagram.com'
     shortcode_set = []
     try:
@@ -164,9 +170,12 @@ def get_shortcodes_reels(driver):
             post_div = post_div.find_all("a", attrs={"class":"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _a6hd", "role":"link"})
             for div in post_div:
                 shortcode = div['href']
-                if "/reel/" in shortcode:
+                if "/reel/" in shortcode and shortcode not in reel_short_code2:
+                    reel_short_code2[shortcode] = 1
+                    parsed_shortcode = shortcode.replace('/reel/', '').replace('/', '')
                     # print('shortcode-----', shortcode)
-                    shortcode_set.append(insta_url+shortcode)
+                    # shortcode_set.append(insta_url+shortcode)
+                    shortcode_set.append(parsed_shortcode)
                     # print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
     except Exception as e:
         traceback.print_exc()
@@ -178,9 +187,13 @@ def get_single_reel_detail(driver, post_url):
     shortcode = post_url.split('/reel/')[1].replace('/', '')
     # print(shortcode)
     data_dict['shortcode'] = shortcode
-    time_ht = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'time')))
-    # print('time_ht----', time_ht.get_attribute('datetime'))
-    time_str = str(time_ht.get_attribute('datetime'))
+    time_str = None
+    try:
+        time_ht = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'time')))
+        time_str = str(time_ht.get_attribute('datetime'))
+    except Exception:
+        traceback.print_exc()
+        print('media date not found -----')
     data_dict['media_date'] = time_str
 
     try:
@@ -217,6 +230,7 @@ def get_single_reel_detail(driver, post_url):
         print('no hahtags')
     print(post_url, 'reel scraped -----')
     single_reel_data_to_api(data_dict)
+    return time_str
 
 
 def click_on_reels_tagged_users(driver):

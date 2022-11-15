@@ -4,7 +4,7 @@ import json
 import traceback
 from constants import (UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL,
 USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL,
-SCROLL_POSTS_URL, SCRAPE_STATUS_URL, FAILURE_STATUS_URL
+SCROLL_POSTS_URL, SCRAPE_STATUS_URL, FAILURE_STATUS_URL, POPU_REELS_DATE_URL
 )
 from datetime import datetime
 
@@ -59,6 +59,7 @@ def reels_data_to_api(media_df):
             'permalink': 'https://www.instagram.com/p/' + row["shortcode"]
         }
         reel_list.append(c_row)
+    print('appended rows -----')
     try:
         url = REELS_DATA_URL
         payload = json.dumps({
@@ -67,7 +68,9 @@ def reels_data_to_api(media_df):
         headers = {
         'Content-Type': 'application/json',
         }
+        print('request made -----')
         response = requests.request("POST", url, headers=headers, data=payload)
+        print('request done -----')
     except Exception:
         traceback.print_exc()
 
@@ -224,6 +227,20 @@ def post_data_to_api(scraped_post_list):
         url = SCROLL_POSTS_URL
         payload = json.dumps({
         "posts_data": scraped_post_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+
+def populate_reels_date(date_dict):
+    print('reel date population api -----')
+    try:
+        url = POPU_REELS_DATE_URL
+        payload = json.dumps({
+        "reels_dict": date_dict,
         })
         headers = {
         'Content-Type': 'application/json',

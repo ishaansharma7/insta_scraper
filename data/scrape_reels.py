@@ -23,9 +23,11 @@ def process_reel(driver, user_name, user_id):
         SCROLL_PAUSE_TIME = wait_time
         shortcode_set = []
         count = 0
+        reel_short_code = {}
+        reel_short_code2 = {}
         while count <= 5:
-            media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df)
-            local_set = get_shortcodes_reels(driver)
+            media_df, sele_worked = get_reel_details(driver.page_source, user_name, user_id, media_df, reel_short_code)
+            local_set = get_shortcodes_reels(driver, reel_short_code2)
             shortcode_set.extend(local_set)
             last_height = driver.execute_script("return document.body.scrollHeight")
 
