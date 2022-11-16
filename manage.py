@@ -16,7 +16,11 @@ from utils.exist_check import login_maintained_check
 from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
+import os
 
+
+if not os.path.exists('excel_dir'):
+   os.makedirs('excel_dir')
 
 application = create_app()
 

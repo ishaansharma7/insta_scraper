@@ -131,7 +131,7 @@ def start_batch_processing(batch=None):
             try:
                 user_df, post_count = get_user_details(driver, user_name, user_id, user_pvt)
                 user_data_to_api(user_df)
-                user_df.to_excel(user_name + "_details.xlsx", encoding='utf-8', index=False)
+                user_df.to_excel('excel_dir/' + user_name + "_details.xlsx", encoding='utf-8', index=False)
             except Exception as e:
                 traceback.print_exc()
                 pass
