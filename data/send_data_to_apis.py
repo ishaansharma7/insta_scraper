@@ -52,14 +52,13 @@ def reels_data_to_api(media_df):
 			'like_count': row["like_count"],
             'view_count': row["view_count"],
             'user_id': row["user_id"],
-            'last_updated': str(datetime.now().date()),
+            'last_updated': str(datetime.now()),
             'like_count_int': like_count_int,
             'comments_count_int': comments_count_int,
             'view_count_int': view_count_int,
             'permalink': 'https://www.instagram.com/p/' + row["shortcode"]
         }
         reel_list.append(c_row)
-    print('appended rows -----')
     try:
         url = REELS_DATA_URL
         payload = json.dumps({
@@ -68,9 +67,7 @@ def reels_data_to_api(media_df):
         headers = {
         'Content-Type': 'application/json',
         }
-        print('request made -----')
         response = requests.request("POST", url, headers=headers, data=payload)
-        print('request done -----')
     except Exception:
         traceback.print_exc()
 
@@ -93,7 +90,7 @@ def user_data_to_api(user_df):
 			'followers_count_int':followers_count_int,
             'following_count_int':following_count_int,
             'post_count_int':post_count_int,
-            'last_updated':str(datetime.now().date()),
+            'last_updated':str(datetime.now()),
             'highlights':row["highlights"]
         }
         user_list.append(c_row)
@@ -134,7 +131,7 @@ def reel_status_api(user_data_dict: dict, scraping_id_status: dict=None):
             update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
         
         url = SCRAPE_STATUS_URL
-        user_data_dict['last_updated'] = str(datetime.now().date())
+        user_data_dict['last_updated'] = str(datetime.now())
         payload = json.dumps({
         "reel_scrape_status": user_data_dict,
         })
@@ -151,7 +148,7 @@ def fail_status_api(user_data_dict: dict):
     try:
         
         url = FAILURE_STATUS_URL
-        user_data_dict['last_updated'] = str(datetime.now().date())
+        user_data_dict['last_updated'] = str(datetime.now())
         payload = json.dumps({
         "fail_status": user_data_dict,
         })
@@ -185,7 +182,7 @@ def posts_data_to_api(media_df):
             'view_count': row["view_count"],
             'user_id': row["user_id"],
             'alt_text': row["alt_text"],
-            'last_updated': str(datetime.now().date())
+            'last_updated': str(datetime.now())
         }
         post_list.append(c_row)
     try:
@@ -221,7 +218,7 @@ def post_data_to_api(scraped_post_list):
     for row in scraped_post_list:
         row['comments_count_int'] = number_clean_up(row["comments_count"])
         row['like_count_int'] = number_clean_up(row["like_count"])
-        row['last_updated'] = str(datetime.now().date())
+        row['last_updated'] = str(datetime.now())
         row['permalink'] = 'https://www.instagram.com/p/' + row["shortcode"]
     try:
         url = SCROLL_POSTS_URL

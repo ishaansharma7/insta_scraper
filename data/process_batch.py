@@ -107,10 +107,12 @@ def start_batch_processing(batch=None):
             sleep(wait_time)
 
             ###################### health check process ######################
-            if not login_maintained_check(driver) and not health_good(health_vars):
-
+            if not login_maintained_check(driver) or not health_good(health_vars):
                 driver = retry_login(driver)
                 if not driver:  return
+                driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
+                wait_time = random.randrange(2, 5)
+                sleep(wait_time)
             
             ###################### checking account ######################
             if not check_handle_valid(driver):
