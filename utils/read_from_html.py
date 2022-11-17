@@ -287,9 +287,13 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
 
             img_ele = beautifulSoupText.find('img')
             alt_text = ''
+            media_url = ''
             if 'alt' in img_ele.attrs:
                 alt_text = img_ele.attrs['alt']
             # print('alt_text-----', alt_text)
+            if 'src' in img_ele.attrs:
+                media_url = img_ele.attrs['src']
+            # print('src-----', media_url)
 
             scraped_post_list.append({
                 'shortcode': shortcode,
@@ -297,7 +301,8 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
                 'comments_count': comment_count,
                 'alt_text': alt_text,
                 'user_name': user_name,
-                'user_id': user_id
+                'user_id': user_id,
+                'media_url': media_url
             })
             hover_success = True
             sleep(.3)

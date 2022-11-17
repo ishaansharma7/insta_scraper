@@ -147,7 +147,7 @@ def start_batch_processing(batch=None):
             ###################### processing reels ######################
             process_reel(driver, user_name, user_id)
             ###################### processing posts ######################
-            # process_posts(driver, user_name, user_id)
+            process_posts(driver, user_name, user_id)
 
         except Exception:
             traceback.print_exc()
