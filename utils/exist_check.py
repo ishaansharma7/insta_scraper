@@ -35,14 +35,33 @@ def check_handle_valid(driver):
 
 def check_if_logged_in(driver):
     driver.get('https://www.instagram.com/')
-    logged_in = False
+    sleep(10)
+    # logged_in = False
+    # try:
+    #     username_field =  WebDriverWait(driver,5).until(EC.presence_of_all_elements_located((By.NAME, 'username')))
+    #     print('No login session present!!!--------')
+    # except Exception:
+    #     logged_in = True
+    #     print('login session present--------')
+    # return logged_in
     try:
-        username_field =  WebDriverWait(driver,5).until(EC.presence_of_all_elements_located((By.NAME, 'username')))
-        print('No login session present!!!--------')
+        panel =  WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+        login_check_list = [
+            'https://www.instagram.com/explore/',
+            'https://www.instagram.com/direct/inbox/',
+            ]
+        sc_list = []
+        for item in panel:
+            sc_list.append(str(item.get_attribute('href')))
+        if all(x in sc_list for x in login_check_list):
+            print('logged in--------')
+            return True
+        else:
+            print('login not maintained --------')
+            return False
     except Exception:
-        logged_in = True
-        print('login session present--------')
-    return logged_in
+        print('login not maintained --------')
+    return False
 
 
 def user_handle_pvt(driver):
@@ -52,3 +71,23 @@ def user_handle_pvt(driver):
         return True
     except Exception:
         return False
+
+def login_maintained_check(driver):
+    try:
+        panel =  WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'a')))
+        login_check_list = [
+            'https://www.instagram.com/explore/',
+            'https://www.instagram.com/direct/inbox/',
+            ]
+        sc_list = []
+        for item in panel:
+            sc_list.append(str(item.get_attribute('href')))
+        if all(x in sc_list for x in login_check_list):
+            print('logged in--------')
+            return True
+        else:
+            print('login not maintained --------')
+            return False
+    except Exception:
+        print('login not maintained --------')
+    return False

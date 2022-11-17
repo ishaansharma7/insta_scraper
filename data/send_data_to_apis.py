@@ -4,7 +4,7 @@ import json
 import traceback
 from constants import (UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL,
 USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL,
-SCROLL_POSTS_URL
+SCROLL_POSTS_URL, SCRAPE_STATUS_URL, FAILURE_STATUS_URL, POPU_REELS_DATE_URL
 )
 from datetime import datetime
 
@@ -124,33 +124,41 @@ def number_clean_up(clean_value):
 		pass
 	return clean_value
 
-def return_status_resp(user_name_status: dict, scraping_id_status: dict=None):
+def reel_status_api(user_data_dict: dict, scraping_id_status: dict=None):
     try:
-        user_name_list = []
-        for k, v in user_name_status.items():
-            if 'resp_send' in v: continue
-            v['user_name'] = k
-            v['resp_send'] = True
-            user_name_list.append(v)
-
         if scraping_id_status:
             print('scraping_id_status send-----')
             update_scrape_id_status(scraping_id_status['scrape_id'], scraping_id_status['status'])
         
-        if not len(user_name_list): return
-        url = USER_NAME_STATUS_URL
+        url = SCRAPE_STATUS_URL
+        user_data_dict['last_updated'] = str(datetime.now().date())
         payload = json.dumps({
-        "user_name_status": user_name_list,
+        "reel_scrape_status": user_data_dict,
         })
         headers = {
         'Content-Type': 'application/json',
         }
         response = requests.request("POST", url, headers=headers, data=payload)
-        print('user_name_list-------')
-        pprint(user_name_list)
-
     except Exception:
         traceback.print_exc()
+        print('unable to send reel status, POS:sdta-1 -----')
+    return
+
+def fail_status_api(user_data_dict: dict):
+    try:
+        
+        url = FAILURE_STATUS_URL
+        user_data_dict['last_updated'] = str(datetime.now().date())
+        payload = json.dumps({
+        "fail_status": user_data_dict,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+        print('unable to send reel status, POS:sdta-1 -----')
     return
     
 def get_user_name_batch(limit=5):
@@ -191,7 +199,7 @@ def posts_data_to_api(media_df):
 
 
 def single_reel_data_to_api(reel_dict):
-    print('sending single reel data data-----')
+    print('sending single reel data -----')
     
     try:
         url = SINGLE_REEL_URL
@@ -216,6 +224,20 @@ def post_data_to_api(scraped_post_list):
         url = SCROLL_POSTS_URL
         payload = json.dumps({
         "posts_data": scraped_post_list,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+
+def populate_reels_date(date_dict):
+    print('reel date population api -----')
+    try:
+        url = POPU_REELS_DATE_URL
+        payload = json.dumps({
+        "reels_dict": date_dict,
         })
         headers = {
         'Content-Type': 'application/json',

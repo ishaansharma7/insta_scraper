@@ -23,7 +23,7 @@ def check_exists_by_xpath(driver, xpath):
 def automated_login(driver, username, password):
     print('started')
 
-    sleep(random.randrange(2, 7))
+    sleep(random.randrange(8, 12))
 
     username_field = driver.find_element_by_name("username")
     password_filed = driver.find_element_by_name("password")
@@ -72,6 +72,8 @@ def automated_login(driver, username, password):
 
 
 def do_insta_login(USER_NAME, PASSWORD):
+    if not USER_NAME or not PASSWORD:
+        return False, None
     try:
         session_path = os.path.join(os.getcwd(), 'selenium_session')
         if os.path.exists(session_path):
