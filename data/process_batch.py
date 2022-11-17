@@ -111,6 +111,7 @@ def start_batch_processing(batch=None):
                 driver = retry_login(driver)
                 if not driver:  return
                 driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
+                health_vars['page_not_avail'] = 0
                 wait_time = random.randrange(2, 5)
                 sleep(wait_time)
             
