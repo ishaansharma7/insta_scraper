@@ -91,3 +91,21 @@ def login_maintained_check(driver):
     except Exception:
         print('login not maintained --------')
     return False
+
+
+
+def tell_current_sc_id(driver, url=None):
+    try:
+        driver.get('https://www.instagram.com/instagram/')
+        sleep(10)
+        panel =  WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'img')))
+        for item in panel:
+            if "'s profile picture" in str(item.get_attribute('alt')):
+                sc_id = str(item.get_attribute('alt')).replace("'s profile picture", '')
+                print('current scraping ID:', sc_id)
+                return sc_id
+        
+    except Exception:
+        traceback.print_exc()
+        print('failed to find current scrape ID --------')
+    return None

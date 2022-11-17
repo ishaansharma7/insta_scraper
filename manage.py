@@ -12,7 +12,7 @@ from utils.selenium_driver import get_web_driver
 from time import sleep, time
 from datetime import timedelta
 from utils.read_from_html import per_hover, get_single_reel_detail
-from utils.exist_check import login_maintained_check
+from utils.exist_check import login_maintained_check, tell_current_sc_id
 from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
@@ -37,15 +37,10 @@ def user_details():
    else:
       print('no creds for login-----')
       return
-   driver = get_web_driver(CHROMEDRIVER, False)
-   # _, driver = do_insta_login(scraping_id, password)
-   # get_single_date(driver, 'https://www.instagram.com/reel/Cj-GcxTgBTn/')
-   # get_single_reel_detail(driver, 'https://www.instagram.com/reel/Cj-MVhAJA5y/')
-   # driver.get('https://www.instagram.com/flying_kudi/')
-   # per_hover(driver,{}, {'ct':0}, '', '')
+   driver = get_web_driver(CHROMEDRIVER, True)
    sleep(10)
-   driver.get('https://www.instagram.com/harshbeniwal/')
-   print(login_maintained_check(driver))
+   driver.get('https://www.instagram.com/instagram/')
+   tell_current_sc_id(driver)
    sleep(300)
    return
 

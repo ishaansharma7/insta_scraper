@@ -2,7 +2,7 @@ from time import sleep
 from data.one_time_insta_login import do_insta_login
 import random
 import traceback
-from utils.exist_check import check_handle_valid, user_handle_pvt, login_maintained_check
+from utils.exist_check import check_handle_valid, user_handle_pvt, login_maintained_check, tell_current_sc_id
 from utils.read_from_html import get_user_details
 from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
 from data.send_data_to_apis import request_scraping_creds, fail_status_api, user_data_to_api, get_user_name_batch, update_scrape_id_status
@@ -20,11 +20,15 @@ def health_good(health_vars):
 
 
 def retry_login(driver):
+    old_sc_id = tell_current_sc_id(driver)
+    if old_sc_id:
+        update_scrape_id_status(old_sc_id, 'banned')
     driver.close()
     print('maybe id banned, retrying login ------')
     try:
         # update_scrape_id_status(scraping_id, 'banned')
         scraping_id, password = request_scraping_creds()
+        print('new scraping id:', scraping_id)
         login_success, driver = do_insta_login(scraping_id, password)
 
         if not login_success:
