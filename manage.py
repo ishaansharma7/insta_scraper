@@ -32,14 +32,8 @@ def func_test_cmd():
 
 @application.cli.command('test_feature')
 def user_details():
-   if CRED_AVAILABLE:
-      scraping_id, password = USER_NAME, PASSWORD
-   else:
-      print('no creds for login-----')
-      return
    driver = get_web_driver(CHROMEDRIVER, True)
    sleep(10)
-   driver.get('https://www.instagram.com/instagram/')
    tell_current_sc_id(driver)
    sleep(300)
    return

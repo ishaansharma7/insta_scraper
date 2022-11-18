@@ -100,12 +100,13 @@ def tell_current_sc_id(driver, url=None):
         sleep(10)
         panel =  WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'img')))
         for item in panel:
-            if "'s profile picture" in str(item.get_attribute('alt')):
+            found_text = str(item.get_attribute('alt'))
+            if "'s profile picture" in found_text and 'instagram' not in found_text:
                 sc_id = str(item.get_attribute('alt')).replace("'s profile picture", '')
                 print('current scraping ID:', sc_id)
                 return sc_id
         
     except Exception:
         traceback.print_exc()
-        print('failed to find current scrape ID --------')
+    print('failed to find current scrape ID --------')
     return None
