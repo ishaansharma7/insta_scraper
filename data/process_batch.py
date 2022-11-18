@@ -4,12 +4,11 @@ import random
 import traceback
 from utils.exist_check import check_handle_valid, user_handle_pvt, login_maintained_check, tell_current_sc_id
 from utils.read_from_html import get_user_details
-from constants import CONSECUTIVE_FAIL_LIMIT, SELENIUM_FAIL_LIMIT, CRED_AVAILABLE, USER_NAME, PASSWORD, CHROMEDRIVER, HEADLESS, REUSE_SESSION, BATCH_SIZE
+from constants import CONSECUTIVE_FAIL_LIMIT, BATCH_SIZE
 from data.send_data_to_apis import request_scraping_creds, fail_status_api, user_data_to_api, get_user_name_batch, update_scrape_id_status
-from utils.selenium_driver import get_web_driver
-from utils.exist_check import check_if_logged_in
 from data.scrape_reels import process_reel
 from data.scrape_posts import process_posts
+from data.session_management import get_session
 
 
 def health_good(health_vars):
@@ -40,38 +39,16 @@ def retry_login(driver):
         print('failure in re-login process, POS:pb-2 ------')
     return None
 
-def health_check_process(health_vars):
-    pass
 
-
-
-
-def start_batch_processing(batch=None):
+def start_batch_processing(batch=None, redo=True):
     
 
     ###################### session usage ######################
-    scraping_id, password = USER_NAME, PASSWORD
-    if REUSE_SESSION:
-        driver = get_web_driver(CHROMEDRIVER, HEADLESS)
-        login_success = check_if_logged_in(driver)
-    else:
-        login_success, driver = do_insta_login(scraping_id, password)
-
-    if not login_success:
-        if driver: driver.close()
-        login_success, driver = do_insta_login(scraping_id, password)
-    
-    if not login_success:
-        if driver: driver.close()
-        print('login failed, retrying------')
-        scraping_id, password = request_scraping_creds()
-        login_success, driver = do_insta_login(scraping_id, password)
-
+    login_success, driver = get_session()
     if not login_success:
         print('login failed, exiting------')
         return
-        
-    if not REUSE_SESSION:   print('scraping id in use-----', scraping_id)
+    # if not REUSE_SESSION:   print('scraping id in use-----', scraping_id)
 
     ###################### get batch ######################
     if not batch:
@@ -82,6 +59,10 @@ def start_batch_processing(batch=None):
     
     ###################### health variables ######################
     health_vars = {'page_not_avail':0, 'selenium_fail':0}
+    
+    ###################### process variables ######################
+    lost_users_temp = {}
+    lost_users_perm = {}
 
 
     ###################### batch processing starts ######################
@@ -116,6 +97,8 @@ def start_batch_processing(batch=None):
                 if not driver:  return
                 driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
                 health_vars['page_not_avail'] = 0
+                lost_users_perm.update(lost_users_temp)
+                lost_users_temp.clear()
                 wait_time = random.randrange(2, 5)
                 sleep(wait_time)
             
@@ -127,9 +110,11 @@ def start_batch_processing(batch=None):
                 fail_status_api(user_data_dict)
                 print('skipping further process------')
                 health_vars['page_not_avail'] += 1
+                lost_users_temp[user_name] = user_id
                 continue
             else:
                 health_vars['page_not_avail'] = 0
+                lost_users_temp.clear()
 
             ###################### scrape user info ######################
             user_pvt = user_handle_pvt(driver)
@@ -162,4 +147,8 @@ def start_batch_processing(batch=None):
             print(f'no details scraped for {user_name}, maybe a major process like details, reel or post scrape failed, POS:pb-1 ------')
             fail_status_api(user_data_dict)
     print('batch scraping completed----')
+    if lost_users_perm and redo:
+        print('started batch processing for left users when banned')
+        if driver: driver.close()
+        start_batch_processing(lost_users_perm, False)
     return
