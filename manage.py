@@ -49,12 +49,7 @@ def user_details():
 def process_batch_func():
    batch = None
    batch = {
-      'ishaansharma71a1a':'',
-      'ishaansharma71b1b':'',
-      'ishaansharma71c1c':'',
-      'preronakole': '7e75dfebdada489fb08c74d05f2289d9',
-      'sathesavitanarayan': '2b9146ed5fba4db68760b82f69bf3dd2',
-      'ishaansharma71d1d':'',
+
    }
    print('start time-----',datetime.now())
    start_epoch = time()
