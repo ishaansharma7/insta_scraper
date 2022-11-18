@@ -102,6 +102,7 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
         
         beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
         reel_div = beautifulSoupText.find('main')
+        insta_user_name = user_name
         if reel_div:
             # profile_header = reel_div.find("header", attrs={"class": "_aa_h"})
             profile_header = reel_div.find("header", attrs={"class": "x1gv9v1y x1dgd101 x186nx3s x1n2onr6 x2lah0s x1q0g3np x78zum5 x1qjc9v5 xlue5dm x1tb5o9v"})
@@ -125,6 +126,19 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
                                 "account_exists_status" : account_exists_status,
                                 "highlights": highlight_list
                             }, ignore_index=True)
+        pprint({
+                                "user_id" : user_id,
+                                "user_name" : user_name,
+                                "insta_user_name" : insta_user_name, 
+                                "profile_url" : profile_url, 
+                                "post_count": post_count, 
+                                "followers_count" : followers_count, 
+                                "following_count" : following_count, 
+                                "bio" : bio, 
+                                "account_type" : user_pvt,
+                                "account_exists_status" : account_exists_status,
+                                "highlights": highlight_list
+                            })
         return user_df, post_count_int
 
 
@@ -218,7 +232,7 @@ def get_single_reel_detail(driver, post_url):
         else:
             data_dict['caption'] = caption1
     except Exception:
-        traceback.print_exc()
+        # traceback.print_exc()
         print('no caption-----')
 
     # print('full captions----', caption_text)
