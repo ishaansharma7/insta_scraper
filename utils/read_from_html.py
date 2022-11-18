@@ -126,19 +126,6 @@ def get_user_details(driver, user_name, user_id, user_pvt=False):
                                 "account_exists_status" : account_exists_status,
                                 "highlights": highlight_list
                             }, ignore_index=True)
-        pprint({
-                                "user_id" : user_id,
-                                "user_name" : user_name,
-                                "insta_user_name" : insta_user_name, 
-                                "profile_url" : profile_url, 
-                                "post_count": post_count, 
-                                "followers_count" : followers_count, 
-                                "following_count" : following_count, 
-                                "bio" : bio, 
-                                "account_type" : user_pvt,
-                                "account_exists_status" : account_exists_status,
-                                "highlights": highlight_list
-                            })
         return user_df, post_count_int
 
 
