@@ -43,7 +43,7 @@ def user_details():
 def process_batch_func():
    batch = None
    batch = {
-
+      
    }
    print('start time-----',datetime.now())
    start_epoch = time()

@@ -11,6 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from data.send_data_to_apis import single_reel_data_to_api, post_data_to_api
 from data.highlights_data import get_high_data
 from utils.populate_dates import populate_reel_dates
+from dateutil.parser import parse
 
 
 def get_reel_details(contents, user_name, user_id, media_df, reel_short_code):
@@ -289,8 +290,12 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
             img_ele = beautifulSoupText.find('img')
             alt_text = ''
             media_url = ''
+            media_date = None
+            
             if 'alt' in img_ele.attrs:
                 alt_text = img_ele.attrs['alt']
+                media_date = get_date_from_alt(alt_text)
+                if media_date: media_date = str(media_date)
             # print('alt_text-----', alt_text)
             if 'src' in img_ele.attrs:
                 media_url = img_ele.attrs['src']
@@ -303,7 +308,8 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
                 'alt_text': alt_text,
                 'user_name': user_name,
                 'user_id': user_id,
-                'media_url': media_url
+                'media_url': media_url,
+                'media_date': media_date,
             })
             hover_success = True
             sleep(.3)
@@ -368,3 +374,24 @@ def get_post_details(contents, user_name, user_id, covered_shortcodes, media_df)
         traceback.print_exc()
         return media_df, False
     return media_df, True
+
+
+def get_date_from_alt(alt_text: str):
+    try:
+        if 'Photo' in alt_text[0:16] and 'by' in alt_text[0:16]:
+            after_on = alt_text.split('on', 1)[1]
+            str_time = ''
+            if 'tagging' in after_on:
+                before_tagging = after_on.split('tagging', 1)[0]
+                str_time = before_tagging.strip()
+            elif '. May be' in after_on:
+                before_maybe = after_on.split('. May be', 1)[0]
+                str_time = before_maybe.strip()
+            elif '.' == after_on[-1]:
+                str_time = after_on.replace('.', '').strip()
+            if str_time != '':
+                return parse(str_time)
+    except Exception:
+        traceback.print_exc()
+    return None
+        
