@@ -379,7 +379,7 @@ def get_post_details(contents, user_name, user_id, covered_shortcodes, media_df)
 def get_date_from_alt(alt_text: str):
     try:
         if 'Photo' in alt_text[0:16] and 'by' in alt_text[0:16]:
-            after_on = alt_text.split('on', 1)[1]
+            after_on = alt_text.split(' on ', 1)[1]
             str_time = ''
             if 'tagging' in after_on:
                 before_tagging = after_on.split('tagging', 1)[0]
