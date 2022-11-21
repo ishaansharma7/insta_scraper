@@ -74,4 +74,4 @@ def process_reel(driver, user_name, user_id):
         user_data_dict["reason"] = []
         user_data_dict["reason"].append('selenium_failed')
         print(f'no details scraped for {user_name}, maybe a failure in reels scraping, POS:sr-3 ------')
-        fail_status_api(user_data_dict)
+        # fail_status_api(user_data_dict)
