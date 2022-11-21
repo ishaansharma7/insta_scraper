@@ -145,7 +145,7 @@ def start_batch_processing(batch=None, redo=True):
             user_data_dict["reason"] = []
             user_data_dict["reason"].append('selenium_failed')
             print(f'no details scraped for {user_name}, maybe a major process like details, reel or post scrape failed, POS:pb-1 ------')
-            fail_status_api(user_data_dict)
+            # fail_status_api(user_data_dict)
     print('batch scraping completed----')
     if lost_users_perm and redo:
         print('started batch processing for left users when banned')
