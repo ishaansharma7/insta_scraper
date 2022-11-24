@@ -392,6 +392,6 @@ def get_date_from_alt(alt_text: str):
             if str_time != '':
                 return parse(str_time)
     except Exception:
-        traceback.print_exc()
+        print('unable to get post media date-----')
     return None
         

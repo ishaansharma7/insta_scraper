@@ -6,7 +6,7 @@ import traceback
 import json
 from kafka import KafkaConsumer
 from scripts.test_script import hello_world
-from data import process_batch
+from data import process_batch, process_kafka_batch
 from constants import CHROMEDRIVER, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
 from time import sleep, time
@@ -17,6 +17,7 @@ from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
 import os
+from scripts.kafka_producer import send_to_insta_kafka
 
 
 if not os.path.exists('excel_dir'):
@@ -57,6 +58,22 @@ def process_batch_func():
    return
 
 
+
+@application.cli.command("consume_batch")
+def consume_batch():
+   print('start time-----',datetime.now())
+   start_epoch = time()
+
+   print(process_kafka_batch.start_kafka_batch_processing())
+
+   print('end time-----',datetime.now())
+   end_seconds = time() - start_epoch
+   print('total duration-----', timedelta(seconds=end_seconds))
+   print('\n \n \n')
+   return
+
+
+
 @application.cli.command('bulk_new_user_onboarding')
 def new_user_onboarding(new_users=None):
    new_users = get_new_users()
@@ -86,3 +103,26 @@ def func_comment_sync_kafka():
    except Exception as e:
       traceback.print_exc()
       print ("Error in readFromKafka {}".format(e))
+
+@application.cli.command("test_kafka_con")
+def test_kafka_con():
+   try:
+      consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', enable_auto_commit=True, group_id = 'test_group_id')
+      consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
+      print(consumer)
+      while True:
+         for msg in consumer:
+            print("offset", msg.offset)
+            msg = msg[6]
+            payload = json.loads(msg)
+            print(payload)
+            consumer.commit()
+   except Exception as e:
+      traceback.print_exc()
+      print ("Error in readFromKafka {}".format(e))
+
+
+@application.cli.command("test_kafka_pro")
+def test_kafka_pro():
+   payload = {'ishaan_sharma': 23}
+   send_to_insta_kafka(payload=payload, key='2')
