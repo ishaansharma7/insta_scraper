@@ -11,6 +11,7 @@ from data.scrape_reels import process_reel
 from data.scrape_posts import process_posts
 from data.session_management import get_session
 from kafka import KafkaConsumer
+from data.find_user import process_invalid_username
 import json
 
 
@@ -115,14 +116,22 @@ def start_kafka_batch_processing():
                 
                 ###################### checking account ######################
                 if not check_handle_valid(driver):
-                    user_data_dict["scrape_status"] = 'failure'
-                    user_data_dict["reason"] = []
-                    user_data_dict["reason"].append('page_not_available')
-                    fail_status_api(user_data_dict)
-                    print('skipping further process------')
-                    health_vars['page_not_avail'] += 1
-                    lost_users_temp[user_name] = user_id
-                    continue
+                    found_user, new_user_name = process_invalid_username(driver, user_name)
+                    if found_user:
+                        user_name = new_user_name
+                        user_data_dict['user_name'] = user_name
+                        driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
+                        health_vars['page_not_avail'] = 0
+                        lost_users_temp.clear()
+                    else:
+                        user_data_dict["scrape_status"] = 'failure'
+                        user_data_dict["reason"] = []
+                        user_data_dict["reason"].append('page_not_available')
+                        fail_status_api(user_data_dict)
+                        print('skipping further process------')
+                        health_vars['page_not_avail'] += 1
+                        lost_users_temp[user_name] = user_id
+                        continue
                 else:
                     health_vars['page_not_avail'] = 0
                     lost_users_temp.clear()
