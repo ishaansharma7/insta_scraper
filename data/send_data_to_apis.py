@@ -250,7 +250,7 @@ def populate_reels_date(date_dict):
 
 
 def get_shortcode_using_username(user_name):
-    print('new user_name update api-----')
+    print('get shortcode api -----')
     try:
         url = GET_SHORTCODE_USERNAME
         payload = json.dumps({

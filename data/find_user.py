@@ -6,6 +6,7 @@ from data.send_data_to_apis import update_new_user_name
 from bs4 import BeautifulSoup
 from time import sleep
 import traceback
+from utils.exist_check import check_handle_valid
 
 
 def find_new_user_name(driver, user_name):
@@ -16,6 +17,9 @@ def find_new_user_name(driver, user_name):
         url = f'https://www.instagram.com/p/{shortcode}/'
         driver.get(url)
         sleep(5)
+        if not check_handle_valid(driver):
+            print('again username not valid -----')
+            return None
         beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
         spans = beautifulSoupText.find_all("span", attrs={"class":"_aap6 _aap7 _aap8"})
         for span in spans:
