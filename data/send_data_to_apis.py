@@ -4,7 +4,8 @@ import json
 import traceback
 from constants import (UPDATE_SCRAPEID_STATUS_URL, SEND_SCRAPEID_URL, REELS_DATA_URL,
 USER_DATA_URL, SEND_USERNAME_URL, USER_NAME_STATUS_URL, POSTS_DATA_URL, SINGLE_REEL_URL,
-SCROLL_POSTS_URL, SCRAPE_STATUS_URL, FAILURE_STATUS_URL, POPU_REELS_DATE_URL
+SCROLL_POSTS_URL, SCRAPE_STATUS_URL, FAILURE_STATUS_URL, POPU_REELS_DATE_URL, UPDATE_NEW_USERNAME_URL,
+GET_SHORTCODE_USERNAME
 )
 from datetime import datetime
 
@@ -238,6 +239,40 @@ def populate_reels_date(date_dict):
         url = POPU_REELS_DATE_URL
         payload = json.dumps({
         "reels_dict": date_dict,
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    except Exception:
+        traceback.print_exc()
+    return None
+
+
+def get_shortcode_using_username(user_name):
+    print('new user_name update api-----')
+    try:
+        url = GET_SHORTCODE_USERNAME
+        payload = json.dumps({
+        "user_name": user_name
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        data_dict = response.json()
+        return data_dict['data']['result']['shortcode']
+    except Exception:
+        traceback.print_exc()
+    return None
+
+def update_new_user_name(new_user_name, old_user_name):
+    print('new user_name update api-----')
+    try:
+        url = UPDATE_NEW_USERNAME_URL
+        payload = json.dumps({
+        "new_user_name": new_user_name,
+        "old_user_name": old_user_name
         })
         headers = {
         'Content-Type': 'application/json',

@@ -11,13 +11,13 @@ from constants import CHROMEDRIVER, CRED_AVAILABLE, USER_NAME, PASSWORD
 from utils.selenium_driver import get_web_driver
 from time import sleep, time
 from datetime import timedelta
-from utils.read_from_html import per_hover, get_single_reel_detail
-from utils.exist_check import login_maintained_check, tell_current_sc_id
 from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
 import os
 from scripts.kafka_producer import send_to_insta_kafka
+from data.find_user import find_new_user_name
+from data.send_data_to_apis import get_shortcode_using_username
 
 
 if not os.path.exists('excel_dir'):
@@ -33,9 +33,9 @@ def func_test_cmd():
 
 @application.cli.command('test_feature')
 def user_details():
-   driver = get_web_driver(CHROMEDRIVER, True)
+   driver = get_web_driver(CHROMEDRIVER, False)
    sleep(10)
-   tell_current_sc_id(driver)
+   find_new_user_name(driver, 'ishaan')
    sleep(300)
    return
 
@@ -126,3 +126,7 @@ def test_kafka_con():
 def test_kafka_pro():
    payload = {'ishaan_sharma': 23}
    send_to_insta_kafka(payload=payload, key='2')
+
+@application.cli.command("test_api")
+def test_api():
+   print(get_shortcode_using_username('ishaansharma711'))

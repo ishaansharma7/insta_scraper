@@ -29,6 +29,8 @@ FAILURE_STATUS_URL = API_BASE_URL + '/v1/instagram/manager/update/failure-status
 SINGLE_REEL_URL = API_BASE_URL + '/v1/instagram/manager/update/single-reel-data/'
 SCROLL_POSTS_URL = API_BASE_URL + '/v1/instagram/manager/update/scroll-posts-data/'
 POPU_REELS_DATE_URL = API_BASE_URL + '/v1/instagram/manager/update/populate-reel-dates/'
+UPDATE_NEW_USERNAME_URL = API_BASE_URL + '/v1/instagram/manager/update/new-user-name/'
+GET_SHORTCODE_USERNAME = API_BASE_URL + '/v1/instagram/manager/send/username/shortcode/'
 
 insta_url = os.environ["INSTA_GRAPH_URL"]
 mymoney_insta_id = os.environ["MYMONEY_INSTA_ID"]
