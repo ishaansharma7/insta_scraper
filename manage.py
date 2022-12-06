@@ -15,7 +15,7 @@ from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
 import os
-from scripts.kafka_producer import send_to_insta_kafka
+from scripts.scraper_kafka import send_to_scraper_kafka
 from data.find_user import find_new_user_name
 from data.send_data_to_apis import get_shortcode_using_username
 
@@ -121,10 +121,9 @@ def test_kafka_con():
       print ("Error in readFromKafka {}".format(e))
 
 
-@application.cli.command("test_kafka_pro")
+@application.cli.command("send_to_kafka")
 def test_kafka_pro():
-   payload = {'ishaan_sharma': 23}
-   send_to_insta_kafka(payload=payload, key='2')
+   send_to_scraper_kafka({'user_name': 'round2hell', 'user_id': ''})
 
 @application.cli.command("test_api")
 def test_api():
