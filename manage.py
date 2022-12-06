@@ -44,7 +44,6 @@ def user_details():
 def process_batch_func():
    batch = None
    batch = {
-      'angrylakshman_new':''
    }
    print('start time-----',datetime.now())
    start_epoch = time()
