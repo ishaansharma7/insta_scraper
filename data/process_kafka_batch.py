@@ -77,7 +77,6 @@ def start_kafka_batch_processing():
             # print(payload)
             user_name = payload.get('user_name')
             user_id = payload.get('user_id')
-            consumer.commit()
             if not user_name:
                 continue
             try:
