@@ -66,7 +66,7 @@ def start_kafka_batch_processing():
 
     ###################### batch processing starts ######################
     curr_num = 1
-    consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', group_id = 'test_group_id')
+    consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', group_id = 'scraper_app_group_id')
     consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
     print('READY FOR CONSUMPTION -----')
     print('**********************************************')
