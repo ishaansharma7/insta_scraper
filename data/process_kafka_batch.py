@@ -66,7 +66,7 @@ def start_kafka_batch_processing():
 
     ###################### batch processing starts ######################
     curr_num = 1
-    consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', enable_auto_commit=True, group_id = 'test_group_id')
+    consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', group_id = 'test_group_id')
     consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
     print('READY FOR CONSUMPTION -----')
     print('**********************************************')
@@ -78,6 +78,7 @@ def start_kafka_batch_processing():
             # print(payload)
             user_name = payload.get('user_name')
             user_id = payload.get('user_id')
+            consumer.commit()
             if not user_name:
                 continue
             try:

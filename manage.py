@@ -106,7 +106,7 @@ def func_comment_sync_kafka():
 @application.cli.command("test_kafka_con")
 def test_kafka_con():
    try:
-      consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', enable_auto_commit=True, group_id = 'test_group_id')
+      consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', group_id = 'test_group_id')
       consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
       print(consumer)
       while True:
