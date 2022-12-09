@@ -109,10 +109,10 @@ def start_kafka_batch_processing():
                     lost_users_perm.update(lost_users_temp)
                     send_lost_users_to_kafka(lost_users_perm)
                     lost_users_temp.clear()
+                    health_vars['page_not_avail'] = 0
                     driver = retry_login(driver)
                     if not driver:  return
                     driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
-                    health_vars['page_not_avail'] = 0
                     wait_time = random.randrange(2, 5)
                     sleep(wait_time)
                 
