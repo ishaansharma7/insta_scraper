@@ -73,12 +73,13 @@ def start_kafka_batch_processing():
     while True:
         for msg in consumer:
             # print("offset", msg.offset)
+            offset = msg.offset
             msg = msg[6]
             payload = json.loads(msg)
             # print(payload)
             user_name = payload.get('user_name')
             user_id = payload.get('user_id')
-            consumer.commit()
+            consumer.commit(offsets=offset)
             if not user_name:
                 continue
             try:
