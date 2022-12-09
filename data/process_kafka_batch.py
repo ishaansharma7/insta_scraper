@@ -11,7 +11,7 @@ from data.send_data_to_apis import request_scraping_creds, fail_status_api, user
 from data.scrape_reels import process_reel
 from data.scrape_posts import process_posts
 from data.session_management import get_session
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, TopicPartition, OffsetAndMetadata
 from data.find_user import process_invalid_username
 import json
 
@@ -66,7 +66,13 @@ def start_kafka_batch_processing():
 
     ###################### batch processing starts ######################
     curr_num = 1
-    consumer = KafkaConsumer(bootstrap_servers= current_app.config['KAFKA_SERVER'], consumer_timeout_ms=1500, auto_offset_reset='latest', group_id = 'scraper_app_group_id')
+    consumer = KafkaConsumer(
+        bootstrap_servers= current_app.config['KAFKA_SERVER'], 
+        enable_auto_commit = False, 
+        consumer_timeout_ms=1500, 
+        auto_offset_reset='latest',
+        max_poll_records=2,
+        group_id = 'test_group_id')
     consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
     print('READY FOR CONSUMPTION -----')
     print('**********************************************')
@@ -74,12 +80,16 @@ def start_kafka_batch_processing():
         for msg in consumer:
             # print("offset", msg.offset)
             offset = msg.offset
-            msg = msg[6]
-            payload = json.loads(msg)
+            print('offset---', offset)
+            # msg = msg[6]
+            payload = json.loads(msg[6])
             # print(payload)
             user_name = payload.get('user_name')
             user_id = payload.get('user_id')
-            consumer.commit(offsets=offset)
+            # tp=TopicPartition(msg.topic,msg.partition)
+            # om = OffsetAndMetadata(msg.offset+1, msg.timestamp)
+            # consumer.commit({tp:om})
+            consumer.commit()
             if not user_name:
                 continue
             try:
