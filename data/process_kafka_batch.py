@@ -106,13 +106,13 @@ def start_kafka_batch_processing():
 
                 ###################### health check process ######################
                 if not login_maintained_check(driver) or not health_good(health_vars):
+                    lost_users_perm.update(lost_users_temp)
+                    send_lost_users_to_kafka(lost_users_perm)
+                    lost_users_temp.clear()
                     driver = retry_login(driver)
                     if not driver:  return
                     driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
                     health_vars['page_not_avail'] = 0
-                    lost_users_perm.update(lost_users_temp)
-                    send_lost_users_to_kafka(lost_users_perm)
-                    lost_users_temp.clear()
                     wait_time = random.randrange(2, 5)
                     sleep(wait_time)
                 
