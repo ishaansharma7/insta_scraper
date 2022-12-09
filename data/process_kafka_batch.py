@@ -5,6 +5,7 @@ import random
 import traceback
 from utils.exist_check import check_handle_valid, user_handle_pvt, login_maintained_check, tell_current_sc_id
 from utils.read_from_html import get_user_details
+from utils.scraper_kafka import send_lost_users_to_kafka
 from constants import CONSECUTIVE_FAIL_LIMIT, BATCH_SIZE
 from data.send_data_to_apis import request_scraping_creds, fail_status_api, user_data_to_api, get_user_name_batch, update_scrape_id_status
 from data.scrape_reels import process_reel
@@ -109,6 +110,7 @@ def start_kafka_batch_processing():
                     driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
                     health_vars['page_not_avail'] = 0
                     lost_users_perm.update(lost_users_temp)
+                    send_lost_users_to_kafka(lost_users_perm)
                     lost_users_temp.clear()
                     wait_time = random.randrange(2, 5)
                     sleep(wait_time)

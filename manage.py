@@ -15,7 +15,7 @@ from utils.mymoney_db import get_new_users
 from utils.fb_apis import get_user_details_from_api, get_details_from_response
 from utils.utils import user_details_from_api_scrapper
 import os
-from scripts.scraper_kafka import send_to_scraper_kafka
+from utils.scraper_kafka import send_to_scraper_kafka
 from data.find_user import find_new_user_name
 from data.send_data_to_apis import get_shortcode_using_username
 

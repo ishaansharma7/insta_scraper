@@ -34,7 +34,6 @@ def process_invalid_username(driver, old_user_name):
     try:
         new_user_name = find_new_user_name(driver, old_user_name)
         if not new_user_name: return None, None
-        # update new_username in media table using api
         if new_user_name == old_user_name:
             print('old and new username same -----')
             return None, None
@@ -42,6 +41,7 @@ def process_invalid_username(driver, old_user_name):
         if not check_handle_valid(driver):
             print('again username not valid -----')
             return None, None
+        # update new_username in media table using api
         update_new_user_name(new_user_name, old_user_name)
         return True, new_user_name 
     except Exception:
