@@ -17,9 +17,6 @@ def find_new_user_name(driver, user_name):
         url = f'https://www.instagram.com/p/{shortcode}/'
         driver.get(url)
         sleep(5)
-        if not check_handle_valid(driver):
-            print('again username not valid -----')
-            return None
         beautifulSoupText = BeautifulSoup(driver.page_source, 'html.parser')
         spans = beautifulSoupText.find_all("span", attrs={"class":"_aap6 _aap7 _aap8"})
         for span in spans:
@@ -38,6 +35,13 @@ def process_invalid_username(driver, old_user_name):
         new_user_name = find_new_user_name(driver, old_user_name)
         if not new_user_name: return None, None
         # update new_username in media table using api
+        if new_user_name == old_user_name:
+            print('old and new username same -----')
+            return None, None
+        driver.get("https://www.instagram.com/{user_name}/".format(user_name=new_user_name))
+        if not check_handle_valid(driver):
+            print('again username not valid -----')
+            return None, None
         update_new_user_name(new_user_name, old_user_name)
         return True, new_user_name 
     except Exception:

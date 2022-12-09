@@ -123,7 +123,7 @@ def test_kafka_con():
 
 @application.cli.command("send_to_kafka")
 def test_kafka_pro():
-   send_to_scraper_kafka({'user_name': 'round2hell', 'user_id': ''})
+   send_to_scraper_kafka({'user_name': '', 'user_id': ''})
 
 @application.cli.command("test_api")
 def test_api():

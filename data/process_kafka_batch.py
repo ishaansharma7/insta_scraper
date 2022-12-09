@@ -119,7 +119,6 @@ def start_kafka_batch_processing():
                     if found_user:
                         user_name = new_user_name
                         user_data_dict['user_name'] = user_name
-                        driver.get("https://www.instagram.com/{user_name}/".format(user_name=user_name))
                         health_vars['page_not_avail'] = 0
                         lost_users_temp.clear()
                     else:
