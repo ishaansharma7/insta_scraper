@@ -72,7 +72,7 @@ def start_kafka_batch_processing():
         consumer_timeout_ms=1500, 
         auto_offset_reset='latest',
         max_poll_records=2,
-        group_id = 'scraper_app_group_id')
+        group_id = current_app.config['KAFKA_GROUP_ID'])
     consumer.subscribe(current_app.config['SCRAPER_KAFKA_TOPIC'])
     print('READY FOR CONSUMPTION -----')
     print('**********************************************')

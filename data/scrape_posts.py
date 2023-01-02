@@ -1,8 +1,8 @@
-import pandas as pd
 from time import sleep
 import random
-from utils.read_from_html import get_post_details, get_shortcodes_reels, get_full_reel_details, per_hover
-from data.send_data_to_apis import reels_data_to_api, post_data_to_api
+from utils.read_from_html import per_hover
+from data.send_data_to_apis import post_data_to_api
+from utils.populate_dates import populate_posts_date
 import traceback
 
 def process_posts(driver, user_name, user_id):
@@ -34,6 +34,7 @@ def process_posts(driver, user_name, user_id):
             last_height = new_height
             count += 1
         print('no. of scrapped post-----', ct_dict['ct'])
+        populate_posts_date(scraped_post_list)
         post_data_to_api(scraped_post_list)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)
