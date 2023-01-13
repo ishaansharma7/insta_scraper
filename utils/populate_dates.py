@@ -2,7 +2,6 @@ import pandas as pd
 from data.send_data_to_apis import populate_reels_date
 from datetime import datetime
 import traceback
-from test_post import SCRAPED_POST_LIST
 from dateutil.parser import parse
 
 
@@ -46,17 +45,29 @@ def can_populate_post(scraped_post_list):
             return True
     return False
 
+def remove_pinned_post(scraped_post_list):
+    pinned_idx = 0
+    len_post_list = len(scraped_post_list)
+    for idx in range(0, len_post_list):
+        post_dict = scraped_post_list[idx]
+        if 'pinned_post' in post_dict and post_dict['pinned_post'] == True:
+            pinned_idx += 1
+        else:
+            break
+    return scraped_post_list[pinned_idx:]
+
 
 def populate_posts_date(scraped_post_list=[]):
     try:
         # scraped_post_list = SCRAPED_POST_LIST
         print('populate posts -----')
         if not can_populate_post(scraped_post_list): return
-        len_post_list = len(scraped_post_list)
+        rmv_pinned_list = remove_pinned_post(scraped_post_list)
+        len_post_list = len(rmv_pinned_list)
         left_date_idx = 0
         missed_date = False
         for idx in range(0, len_post_list):
-            post_dict = scraped_post_list[idx]
+            post_dict = rmv_pinned_list[idx]
             if idx == 0 and not post_dict['media_date']:    # always give date to latest post
                 post_dict['media_date'] = str(datetime.now().date())
                 left_date_idx = idx
@@ -69,15 +80,15 @@ def populate_posts_date(scraped_post_list=[]):
                 continue
             if post_dict['media_date'] and missed_date:
                 missed_date = False
-                print('indexs:',left_date_idx, ',',idx)
-                fill_date_in_posts(left_date_idx, idx, scraped_post_list)
+                # print('indexs:',left_date_idx, ',',idx)
+                fill_date_in_posts(left_date_idx, idx, rmv_pinned_list)
                 left_date_idx = idx
         if missed_date:
-            last_date = scraped_post_list[left_date_idx]['media_date']
+            last_date = rmv_pinned_list[left_date_idx]['media_date']
             for i in range(left_date_idx+1, len_post_list):
-                post_dict = scraped_post_list[i]
+                post_dict = rmv_pinned_list[i]
                 post_dict['media_date'] = last_date
-        print(scraped_post_list)
+        # print(rmv_pinned_list)
     except Exception:
         traceback.print_exc()
 

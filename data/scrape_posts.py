@@ -4,6 +4,7 @@ from utils.read_from_html import per_hover
 from data.send_data_to_apis import post_data_to_api
 from utils.populate_dates import populate_posts_date
 import traceback
+import json
 
 def process_posts(driver, user_name, user_id):
     try:
@@ -34,7 +35,18 @@ def process_posts(driver, user_name, user_id):
             last_height = new_height
             count += 1
         print('no. of scrapped post-----', ct_dict['ct'])
+
+        # with open(f'{user_name}.txt', 'a') as f:
+        #     f.write(f'USER_NAME: {user_name}\n')
+        #     json.dump(scraped_post_list, f, ensure_ascii=False)
+        #     f.write('\n\n\n\n\n\n')
         populate_posts_date(scraped_post_list)
+        # with open(f'{user_name}.txt', 'a') as f:
+        #     json.dump(scraped_post_list, f, ensure_ascii=False)
+        #     f.write('\n\n')
+        #     f.write('******************************************')
+        #     f.write('\n\n\n\n\n\n')
+        
         post_data_to_api(scraped_post_list)
         wait_time = random.randrange(3, 7)
         sleep(wait_time)

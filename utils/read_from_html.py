@@ -272,7 +272,14 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
             beautifulSoupText = BeautifulSoup(single_post_html, 'html.parser')
             shortcode = str(single_post.get_attribute("href")).split('/p/')[1].replace('/','')
             # print('shortcode-----', shortcode)
-            data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _aacw _aad3 _aad6 _aade"})
+            data_div = beautifulSoupText.find_all("div", attrs={"class":"_aacl _aacp _adda _aad3 _aad6 _aade"})
+            # data_div2 = beautifulSoupText.find("div", attrs={"class":"_ac2d"})
+            # if data_div2:
+            #     print('data_div2----', str(data_div2))
+            pinned_post_div = beautifulSoupText.find("svg", attrs={"aria-label":"Pinned post icon"})
+            pinned_post = False
+            if pinned_post_div:
+                pinned_post = True
             like_comment_div_count = 0
             like_comment_storage = []
             for data in data_div:
@@ -310,6 +317,7 @@ def per_hover(driver, covered_shortcodes, ct_dict, user_name, user_id):
                 'user_id': user_id,
                 'media_url': media_url,
                 'media_date': media_date,
+                'pinned_post': pinned_post,
             })
             hover_success = True
             sleep(.3)
