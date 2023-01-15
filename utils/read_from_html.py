@@ -23,6 +23,8 @@ def get_reel_details(contents, user_name, user_id, media_df, reel_short_code):
             comments_count = like_count = view_count = 0
             media_url = shortcode = None
             for div in reel_div:
+                comments_count = like_count = view_count = 0
+                media_url = shortcode = None
                 shortcode = div['href']
                 if "reel" in shortcode and shortcode not in reel_short_code:
                     reel_short_code[shortcode] = 1
@@ -34,7 +36,10 @@ def get_reel_details(contents, user_name, user_id, media_df, reel_short_code):
                     span_list = div.find_all("span")
                     try:
                         # print('-----',span_list, '------')
-                        if span_list:
+                        if span_list and not div.find("div", attrs={"class":"_aaj-"}):
+                            view_count = span_list[0].string
+                            print('only views shortcode:', shortcode)
+                        elif span_list:
                             like_count = span_list[0].string
                             stat_dict = {'comments_count': 0, 'view_count':0}
                             key = ''
